@@ -1,0 +1,179 @@
+#include "Tests.h"
+#include "OccurrenceMatrix.h"
+#include "Segment.h"
+
+// Function to measure execution time
+template <typename Func>
+double measureExecutionTime(Func func) {
+	auto start = std::chrono::high_resolution_clock::now(); // Start time
+	func(); // Call the function
+	auto end = std::chrono::high_resolution_clock::now(); // End time
+
+	// Calculate duration in milliseconds
+	std::chrono::duration<double, std::milli> duration = end - start;
+	return duration.count(); // Return duration in milliseconds
+}
+
+// Function to display the occurrence matrix
+void displayMatrix(const std::vector<std::vector<int>>& matrix) {
+	std::cout << "Occurrence Matrix:" << std::endl;
+
+	// Iterate through each row
+	for (const auto& row : matrix) {
+		// Iterate through each column in the row
+		for (int count : row) {
+			std::cout << count << " "; // Print the count
+		}
+		std::cout << std::endl; // Move to the next line after each row
+	}
+}
+
+void TestFasta()
+{
+	string fastaFile = R"(C:\Braude\Projects\ncbi_dataset\ncbi_dataset\data\GCF_000001405.40\GCF_000001405.40_GRCh38.p14_genomic.fna)";
+
+	std::cout << "Loading of DNA Started from file : " << fastaFile << std::endl;
+
+	string dnaSequence = load_fasta_file(fastaFile);
+
+	std::cout << "DNA loaded! Size of sequence is  : " << dnaSequence.size() << std::endl;
+
+	string fastaFileToSave = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
+
+	std::cout << "Saving of DNA file started to : " << fastaFileToSave << std::endl;
+
+	save_loaded_data_as_file(fastaFileToSave, dnaSequence);
+
+	std::cout << "DNA saved! " << std::endl;
+
+	std::cout << "Loading of DNA Started from file : " << fastaFileToSave << std::endl;
+
+	string dnaSequenceFromSaved = load_previously_saved_data(fastaFileToSave);
+
+	std::cout << "DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
+
+	if (dnaSequence.size() != dnaSequenceFromSaved.size())
+	{
+		std::cout << "Sequences are different" << std::endl;
+	}
+	if (dnaSequence[100] != dnaSequenceFromSaved[100])
+	{
+		std::cout << "Sequences are different" << std::endl;
+	}
+}
+
+
+void CompareLoadSpeed()
+{
+	string fastaFileToSave = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
+
+	std::cout << "(1)Loading of DNA Started from file : " << fastaFileToSave << std::endl;
+	auto start = std::chrono::high_resolution_clock::now(); // Start time
+	string dnaSequenceFromSaved = load_previously_saved_data(fastaFileToSave);
+	auto end = std::chrono::high_resolution_clock::now(); // End time
+	std::chrono::duration<double, std::milli> duration = end - start;
+	double timeA = duration.count();
+	std::cout << "(1)DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
+
+	std::cout << "(2)Loading of DNA Started from file : " << fastaFileToSave << std::endl;
+	auto start2 = std::chrono::high_resolution_clock::now(); // Start time
+	string dnaSequenceFromSaved2 = load_previously_saved_data2(fastaFileToSave);
+	auto end2 = std::chrono::high_resolution_clock::now(); // End time
+	std::chrono::duration<double, std::milli> duration2 = end2 - start2;
+	double timeB = duration2.count();
+	std::cout << "(2)DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved2.size() << std::endl;
+
+
+	if (dnaSequenceFromSaved.size() != dnaSequenceFromSaved2.size())
+	{
+		std::cout << "Sequences are different" << std::endl;
+	}
+	if (dnaSequenceFromSaved[100] != dnaSequenceFromSaved2[100])
+	{
+		std::cout << "Sequences are different" << std::endl;
+	}
+
+	std::cout << "Execution time of functionA: " << timeA << " ms" << std::endl;
+
+
+	std::cout << "Execution time of functionB: " << timeB << " ms" << std::endl;
+
+	// Compare execution times
+	if (timeA < timeB) {
+		std::cout << "functionA is faster." << std::endl;
+	}
+	else if (timeA > timeB) {
+		std::cout << "functionB is faster." << std::endl;
+	}
+	else {
+		std::cout << "Both functions have the same execution time." << std::endl;
+	}
+}
+
+
+void MatrixTest()
+{
+	string fastaFile = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
+	std::cout << "(1)Loading of DNA Started from file : " << fastaFile << std::endl;
+
+	string dnaSequenceFromSaved = load_previously_saved_data2(fastaFile);
+
+	std::cout << "(1)DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
+
+	int word_size = 5;
+	std::string firstSeq = dnaSequenceFromSaved.substr(0, 20);
+	std::cout << "The First Sequence is  : " << firstSeq << std::endl;
+	auto matrix1 = GenerateOccurrenceMatrix(firstSeq, word_size);
+	std::cout << "Matrix1 : " << std::endl;
+	displayMatrix(matrix1);
+
+	std::string secondSeq = dnaSequenceFromSaved.substr(word_size, 20);
+	std::cout << "The Second Sequence is  : " << secondSeq << std::endl;
+	auto matrix2 = GenerateOccurrenceMatrix(secondSeq, word_size);
+	std::cout << "Matrix2 : " << std::endl;
+	displayMatrix(matrix2);
+
+	std::string word = dnaSequenceFromSaved.substr(0, word_size);
+	std::cout << "Word To Remove : " << word << std::endl;
+	std::string seqToRemove = dnaSequenceFromSaved.substr(0, word_size + (word_size - 1));
+	std::cout << "Section To Remove : " << seqToRemove << std::endl;
+	auto matrixToSub = GenerateOccurrenceMatrix(seqToRemove, word_size);
+	auto matrixAfterSub = RemoveSequenceFromOccurrenceMatrix(matrix1, seqToRemove, word_size);
+	std::cout << "matrixAfterSub : " << std::endl;
+	displayMatrix(matrixAfterSub);
+
+
+	std::string wordToAdd = dnaSequenceFromSaved.substr(20, word_size);
+	std::cout << "Word To Add : " << wordToAdd << std::endl;
+	std::string seqToAdd = dnaSequenceFromSaved.substr(20 - (word_size - 1), word_size + (word_size - 1));
+	std::cout << "Section Added: " << seqToAdd << std::endl;
+	auto matrixAfterAdd = AddSequenceToOccurrenceMatrix(matrixAfterSub, seqToAdd, word_size);
+	std::cout << "matrixAfterAdd : " << std::endl;
+	displayMatrix(matrixAfterAdd);
+
+}
+
+void SegmentTest()
+{
+	string fastaFile = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
+	std::cout << "(1)Loading of DNA Started from file : " << fastaFile << std::endl;
+
+	string dnaSequenceFromSaved = load_previously_saved_data2(fastaFile);
+
+	std::cout << "(1)DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
+
+	int word_size = 13;
+	std::string firstSeq = dnaSequenceFromSaved.substr(0, 4000000);
+	std::cout << "The Sequence size is  : " << firstSeq.size() << std::endl;
+	auto segments = SegmentDNACostAndWord(firstSeq, 2000, word_size, 20000);
+
+	// Print the resulting segments, costs, and best words
+	std::cout << "Segmented DNA sequence with costs and best words:\n";
+	for (const auto& [start, end, cost, bestWord] : segments) {
+		std::cout << "Segment: [" << start << ", " << end << ") -> "
+			<< " len: " << end - start
+			<< " | Cost: " << cost
+			<< " | Best Word: " << bestWord << "\n";
+	}
+
+}
