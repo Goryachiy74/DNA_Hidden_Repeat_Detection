@@ -4,4 +4,4 @@
 void CompareLoadSpeed();
 void TestFasta();
 void MatrixTest();
-void SegmentTest();
+void SegmentTest(std::string filePath, int minSegmentSize, int wordSize, int lookaheadSize);

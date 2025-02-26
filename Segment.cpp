@@ -1,6 +1,38 @@
 #include "Segment.h"
 
+std::mutex mtx; // Mutex for thread safety
+uint64_t progress = 0.0; // Shared progress variable
+bool running = true; // Control variable for the progress thread
+uint64_t totalsize = 100;
 
+static void updateProgress()
+{
+	auto startTime = std::chrono::high_resolution_clock::now(); // Start time
+
+	while (running) 
+	{
+		std::this_thread::sleep_for(std::chrono::seconds(1)); // Update every 10 seconds
+
+		// Lock the mutex to safely access the progress variable
+		std::lock_guard<std::mutex> lock(mtx);
+		double percentage = (static_cast<double>(progress) / totalsize) * 100;
+
+		// Calculate elapsed time
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> elapsed = currentTime - startTime;
+
+		// Convert elapsed time to hours, minutes, and seconds
+		int totalSeconds = static_cast<int>(elapsed.count());
+		int hours = totalSeconds / 3600;
+		int minutes = (totalSeconds % 3600) / 60;
+		int seconds = totalSeconds % 60;
+
+		// Output the current progress and elapsed time
+		std::cout << "\rProgress: " << std::fixed << std::setprecision(4)
+			<< percentage << "% completed. Elapsed time: "
+			<< hours << "h:" << minutes << "m:" << seconds << "s." << std::flush;
+	}
+}
 
 std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostAndWord(
 	const std::string& sequence,
@@ -10,6 +42,9 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 	const std::function<std::pair<double, std::string>(std::string_view, int)>& costFunction*/
 )
 {
+	std::thread progressThread(updateProgress);
+
+
 	if (sequence.size() < static_cast<size_t>(minSegmentSize * wordSize)) {
 		throw std::invalid_argument("Sequence length must be at least the minimum segment size in words.");
 	}
@@ -23,6 +58,13 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 
 	while (currentStart < n)
 	{
+		// Lock the mutex to safely update the progress variable
+		{
+			std::lock_guard<std::mutex> lock(mtx);
+			progress = currentStart; // Update progress
+			totalsize = n;
+		}
+
 		if (!rightMatrix.empty())
 		{
 			leftMatrix = rightMatrix;
@@ -58,22 +100,21 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 			}
 			if (i != 0)
 			{
-				int segmentSize = ((wordSize * 2) - 1);
 				//Left Matrix Calculation
-				uint64_t startOfSegmentToAdd = (currentStart + leftSegmentSize) - segmentSize;
-					std::string_view leftSegmentToAdd(sequence.data() + startOfSegmentToAdd, segmentSize);
+				uint64_t startOfSegmentToAdd = (currentStart + leftSegmentSize) - wordSize;
+					std::string_view leftSegmentToAdd(sequence.data() + startOfSegmentToAdd, wordSize);
 					auto leftMatrixToAdd = GenerateOccurrenceMatrix(leftSegmentToAdd, wordSize);
 					leftMatrix = sumMatrices(leftMatrix, leftMatrixToAdd);
 				//COST FUNC HERE
 					uint64_t startOfSegmentToRemove = (currentEnd - wordSize);
 
 				//Right Matrix Calculation
-					std::string_view leftSegmentToRemove(sequence.data() + startOfSegmentToRemove, segmentSize);
+					std::string_view leftSegmentToRemove(sequence.data() + startOfSegmentToRemove, wordSize);
 					auto leftMatrixToRemove = GenerateOccurrenceMatrix(leftSegmentToRemove, wordSize);
 					rightMatrix = subtractMatrices(rightMatrix, leftMatrixToRemove);
 
-					uint64_t startOfSegmentToAddFromRight = (currentEnd + rightSegmentSize) - segmentSize;
-					std::string_view rightSegmentToAdd(sequence.data() + startOfSegmentToAddFromRight, segmentSize);
+					uint64_t startOfSegmentToAddFromRight = (currentEnd + rightSegmentSize) - wordSize;
+					std::string_view rightSegmentToAdd(sequence.data() + startOfSegmentToAddFromRight, wordSize);
 					auto rightMatrixToAdd = GenerateOccurrenceMatrix(rightSegmentToAdd, wordSize);
 					rightMatrix = sumMatrices(rightMatrix, rightMatrixToAdd);
 					//Cost Function HERE
@@ -115,5 +156,34 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 		}
 	}
 
+	// Stop the progress thread
+	running = false;
+	progressThread.join(); // Wait for the progress thread to finish
+
 	return segments;
+}
+
+void saveSegmentsToCSV(const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments, const std::string& filename)
+{
+	std::ofstream csvFile(filename);
+
+	if (!csvFile.is_open()) {
+		std::cerr << "Error: Could not open the file " << filename << std::endl;
+		return;
+	}
+
+	// Write the header row
+	csvFile << "Start,End,Length,Cost,Best Word\n";
+
+	// Write each segment to the CSV file
+	for (const auto& [start, end, cost, bestWord] : segments) {
+		csvFile << start << ","
+			<< end << ","
+			<< (end - start) << ","
+			<< cost << ","
+			<< bestWord << "\n";
+	}
+
+	csvFile.close();
+	std::cout << "Segments saved to " << filename << std::endl;
 }

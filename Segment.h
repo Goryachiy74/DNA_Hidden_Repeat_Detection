@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <tuple>
+#include <iomanip> // For std::setprecision and std::fixed
 #include "OccurrenceMatrix.h"
 
 std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostAndWord(
@@ -21,3 +22,5 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 	int lookaheadSize/*,
 	const std::function<std::pair<double, std::string>(std::string_view, int)>& costFunction*/
 );
+
+void saveSegmentsToCSV(const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments, const std::string& filename);

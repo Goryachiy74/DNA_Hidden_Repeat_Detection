@@ -14,7 +14,7 @@ std::vector<std::vector<int>> GenerateOccurrenceMatrix(std::string_view sequence
 	std::vector<std::vector<int>> matrix(4, std::vector<int>(word_size, 0));
 
 	// Iterate through the sequence, splitting into words
-	for (size_t i = 0; i + word_size <= sequence.size(); ++i)
+	for (size_t i = 0; i + word_size <= sequence.size(); i+=word_size)
 	{
 		std::string_view word = sequence.substr(i, word_size); // Extract a word of size 'word_size'
 

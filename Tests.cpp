@@ -135,7 +135,7 @@ void MatrixTest()
 
 	std::string word = dnaSequenceFromSaved.substr(0, word_size);
 	std::cout << "Word To Remove : " << word << std::endl;
-	std::string seqToRemove = dnaSequenceFromSaved.substr(0, word_size + (word_size - 1));
+	std::string seqToRemove = dnaSequenceFromSaved.substr(0, word_size);
 	std::cout << "Section To Remove : " << seqToRemove << std::endl;
 	auto matrixToSub = GenerateOccurrenceMatrix(seqToRemove, word_size);
 	auto matrixAfterSub = RemoveSequenceFromOccurrenceMatrix(matrix1, seqToRemove, word_size);
@@ -145,7 +145,7 @@ void MatrixTest()
 
 	std::string wordToAdd = dnaSequenceFromSaved.substr(20, word_size);
 	std::cout << "Word To Add : " << wordToAdd << std::endl;
-	std::string seqToAdd = dnaSequenceFromSaved.substr(20 - (word_size - 1), word_size + (word_size - 1));
+	std::string seqToAdd = dnaSequenceFromSaved.substr(20 , word_size );
 	std::cout << "Section Added: " << seqToAdd << std::endl;
 	auto matrixAfterAdd = AddSequenceToOccurrenceMatrix(matrixAfterSub, seqToAdd, word_size);
 	std::cout << "matrixAfterAdd : " << std::endl;
@@ -153,19 +153,26 @@ void MatrixTest()
 
 }
 
-void SegmentTest()
+void SegmentTest(std::string filePath, int minSegmentSize, int wordSize, int lookaheadSize)
 {
-	string fastaFile = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
-	std::cout << "(1)Loading of DNA Started from file : " << fastaFile << std::endl;
+	//string fastaFile = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
+	std::cout << "Loading of DNA Started from file : " << filePath << std::endl;
 
-	string dnaSequenceFromSaved = load_previously_saved_data2(fastaFile);
+	string dnaSequenceFromSaved = load_previously_saved_data2(filePath);
 
-	std::cout << "(1)DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
+	std::cout << "DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
 
-	int word_size = 13;
-	std::string firstSeq = dnaSequenceFromSaved.substr(0, 4000000);
-	std::cout << "The Sequence size is  : " << firstSeq.size() << std::endl;
-	auto segments = SegmentDNACostAndWord(firstSeq, 2000, word_size, 20000);
+	//int minSegmentSize = 2000;
+	//int word_size = 5;
+	//int lookaheadSize = 20000;
+	//int seqSize = 4000000;
+	//std::string firstSeq = dnaSequenceFromSaved.substr(0, seqSize);
+	std::cout << "The Sequence size is  : " << dnaSequenceFromSaved.size() << std::endl;
+	std::cout << "The Word Size is  : " << wordSize << std::endl;
+	std::cout << "The Minimum Segment Size is  : " << minSegmentSize * wordSize << " nucleotides"<< std::endl;
+	std::cout << "The lookahead Size is  : " << lookaheadSize * wordSize << " nucleotides" << std::endl;
+
+	auto segments = SegmentDNACostAndWord(dnaSequenceFromSaved, minSegmentSize, wordSize, lookaheadSize);
 
 	// Print the resulting segments, costs, and best words
 	std::cout << "Segmented DNA sequence with costs and best words:\n";
@@ -175,5 +182,11 @@ void SegmentTest()
 			<< " | Cost: " << cost
 			<< " | Best Word: " << bestWord << "\n";
 	}
+
+	std::string fileName = "segments_output_"
+		+ std::to_string(minSegmentSize) + "_"
+		+ std::to_string(wordSize) + "_"
+		+ std::to_string(lookaheadSize) + ".csv";
+	saveSegmentsToCSV(segments, fileName);
 
 }
