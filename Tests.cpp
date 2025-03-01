@@ -1,6 +1,7 @@
 #include "Tests.h"
 #include "OccurrenceMatrix.h"
 #include "Segment.h"
+#include "Isochore.h"
 
 // Function to measure execution time
 template <typename Func>
@@ -145,7 +146,7 @@ void MatrixTest()
 
 	std::string wordToAdd = dnaSequenceFromSaved.substr(20, word_size);
 	std::cout << "Word To Add : " << wordToAdd << std::endl;
-	std::string seqToAdd = dnaSequenceFromSaved.substr(20 , word_size );
+	std::string seqToAdd = dnaSequenceFromSaved.substr(20, word_size);
 	std::cout << "Section Added: " << seqToAdd << std::endl;
 	auto matrixAfterAdd = AddSequenceToOccurrenceMatrix(matrixAfterSub, seqToAdd, word_size);
 	std::cout << "matrixAfterAdd : " << std::endl;
@@ -169,7 +170,7 @@ void SegmentTest(std::string filePath, int minSegmentSize, int wordSize, int loo
 	//std::string firstSeq = dnaSequenceFromSaved.substr(0, seqSize);
 	std::cout << "The Sequence size is  : " << dnaSequenceFromSaved.size() << std::endl;
 	std::cout << "The Word Size is  : " << wordSize << std::endl;
-	std::cout << "The Minimum Segment Size is  : " << minSegmentSize * wordSize << " nucleotides"<< std::endl;
+	std::cout << "The Minimum Segment Size is  : " << minSegmentSize * wordSize << " nucleotides" << std::endl;
 	std::cout << "The lookahead Size is  : " << lookaheadSize * wordSize << " nucleotides" << std::endl;
 
 	auto segments = SegmentDNACostAndWord(dnaSequenceFromSaved, minSegmentSize, wordSize, lookaheadSize);
@@ -189,4 +190,17 @@ void SegmentTest(std::string filePath, int minSegmentSize, int wordSize, int loo
 		+ std::to_string(lookaheadSize) + ".csv";
 	saveSegmentsToCSV(segments, fileName);
 
+}
+
+void DetectIsochores(std::string filePath, size_t window_size, double gc_threshold)
+{
+	std::cout << "Loading of DNA Started from file : " << filePath << std::endl;
+
+	string dnaSequenceFromSaved = load_previously_saved_data2(filePath);
+
+	std::cout << "DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
+	std::cout << "The Window Size is  : " << window_size << std::endl;
+	std::cout << "The GC threshold is  : " << gc_threshold * 100 << " percents" << std::endl;
+	auto isochores = detect_isochores(dnaSequenceFromSaved, window_size, gc_threshold);
+	saveIsochoresToCsv(isochores, window_size, gc_threshold);
 }

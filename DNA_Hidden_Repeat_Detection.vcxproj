@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="File_DNA.cpp" />
+    <ClCompile Include="Isochore.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="OccurrenceMatrix.cpp" />
     <ClCompile Include="Segment.cpp" />
@@ -139,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="File_DNA.h" />
+    <ClInclude Include="Isochore.h" />
     <ClInclude Include="OccurrenceMatrix.h" />
     <ClInclude Include="Segment.h" />
     <ClInclude Include="Tests.h" />

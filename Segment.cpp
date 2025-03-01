@@ -52,7 +52,7 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 	std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> segments;
 	uint64_t currentStart = 0; // Starting position of the current segment
 	uint64_t n = sequence.size();
-	std::vector<std::vector<int>> leftMatrix, rightMatrix;
+	std::vector<std::vector<int>> leftMatrix, rightMatrix, bestRightMatrix;
 
 
 
@@ -65,11 +65,6 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 			totalsize = n;
 		}
 
-		if (!rightMatrix.empty())
-		{
-			leftMatrix = rightMatrix;
-			rightMatrix.clear();
-		}
 		double bestScore = -1.0; // Track the best score in the current lookahead window
 		uint64_t bestEnd = -1;        // Track the ending position of the best segment
 		std::pair<double, std::string> bestSegment;
@@ -133,6 +128,7 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 				bestEnd = currentEnd;
 				bestSegment = left;
 				bestLookaheadStep = i;
+				bestRightMatrix = rightMatrix;
 			}
 
 			// Adjust the left and right segment sizes for the next iteration
@@ -141,17 +137,22 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 		}
 
 		// Backtrace if the maximum was found before the end of the lookahead loop
-		if (bestLookaheadStep < lookaheadSize - 1) {
+		if (bestLookaheadStep < lookaheadSize - 1) 
+		{
 			// Backtracking logic can be expanded as needed
 			// For now, simply record the best segment and move on
 		}
 
 		// Add the best left segment to the results and move the current start position
-		if (bestEnd != -1) {
+		if (bestEnd != -1)
+		{
 			segments.emplace_back(currentStart, bestEnd, bestSegment.first, bestSegment.second);
 			currentStart = bestEnd; // Move the start position to the end of the best segment
+			leftMatrix = bestRightMatrix;
+			rightMatrix.clear();
 		}
-		else {
+		else
+		{
 			break; // No valid segments found, terminate
 		}
 	}

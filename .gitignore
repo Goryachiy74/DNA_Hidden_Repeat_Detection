@@ -359,3 +359,4 @@ MigrationBackup/
 /FortuneTuningModule.sln.DotSettings
 /BuildAndPackNugets.bat
 /nugetPack.bat
+*.csv
