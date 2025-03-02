@@ -15,4 +15,6 @@ struct Isochore {
 std::vector<Isochore> detect_isochores(const std::string& dna_sequence, size_t window_size, double gc_threshold);
 void saveIsochoresToCsv(std::vector<Isochore> isochores, size_t window_size, double gc_threshold);
 std::vector<Isochore> detect_isochores2(const std::string& genomeSequence);
+void processFASTA2(const std::string& filename, int windowSize, const std::string& outputCSV);
+void processSequence(const std::string& sequence, int windowSize, const std::string& outputCSV);
 

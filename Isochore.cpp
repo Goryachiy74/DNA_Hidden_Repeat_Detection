@@ -204,3 +204,120 @@ std::vector<Isochore> detect_isochores2(const std::string& genomeSequence) {
     progressThread.join(); // Wait for the progress thread to finish
     return isochores;
 }
+
+// Function to calculate GC content in a DNA sequence
+double calculateGCContent2(const std::string& sequence) {
+    int gcCount = 0, totalCount = 0;
+    for (char base : sequence) {
+        if (base == 'G' || base == 'C' || base == 'g' || base == 'c') {
+            gcCount++;
+        }
+        if (isalpha(base)) { // Ignore non-DNA characters
+            totalCount++;
+        }
+    }
+    return totalCount > 0 ? (gcCount * 100.0 / totalCount) : 0.0;
+}
+
+
+// Function to process FASTA file and compute GC content
+void processFASTA2(const std::string& filename, int windowSize, const std::string& outputCSV) {
+    std::ifstream file(filename);
+    std::ofstream outputFile(outputCSV);
+
+    if (!file.is_open() || !outputFile.is_open()) {
+        std::cerr << "Error opening file!" << std::endl;
+        return;
+    }
+
+    std::string line, sequence = "";
+    long long position = 0;
+    totalsizeI = 0;
+
+    // Compute total genome size
+    while (getline(file, line)) {
+        if (!line.empty() && line[0] != '>') { // Ignore headers
+            totalsizeI += line.size();
+        }
+    }
+    file.clear();
+    file.seekg(0, std::ios::beg); // Reset file pointer
+
+    // Write CSV Header
+    outputFile << "Position,GC_Content\n";
+
+    // Start progress tracking thread
+    std::thread progressThread(updateProgress);
+
+    while (getline(file, line)) {
+        if (line.empty()) continue;
+        if (line[0] == '>') continue; // Skip header
+
+        sequence += line; // Append sequence data
+
+        while (sequence.size() >= windowSize) {
+            std::string window = sequence.substr(0, windowSize);
+            double gcContent = calculateGCContent(window);
+
+            outputFile << position << "," << gcContent << "\n";
+
+            position += windowSize;
+
+            // Update progress
+            {
+                std::lock_guard<std::mutex> lock(mtxI);
+                progressI += windowSize;
+            }
+
+            sequence = sequence.substr(windowSize);
+        }
+    }
+
+    // Stop progress thread
+    runningI = false;
+    progressThread.join();
+
+    file.close();
+    outputFile.close();
+    std::cout << "\nProcessing complete! Output saved in " << outputCSV << std::endl;
+}
+
+// Function to process the DNA sequence
+void processSequence(const std::string& sequence, int windowSize, const std::string& outputCSV)
+{
+    std::ofstream outputFile(outputCSV);
+    if (!outputFile.is_open()) {
+        std::cerr << "Error opening output file!" << std::endl;
+        return;
+    }
+
+    long long position = 0;
+    totalsizeI = sequence.size(); // Set total size for progress tracking
+
+    // Write CSV Header
+    outputFile << "Position,GC_Content\n";
+
+    // Start progress tracking thread
+    std::thread progressThread(updateProgress);
+
+    for (size_t i = 0; i + windowSize <= sequence.size(); i += windowSize) {
+        std::string window = sequence.substr(i, windowSize);
+        double gcContent = calculateGCContent(window);
+
+        outputFile << position << "," << gcContent << "\n";
+        position += windowSize;
+
+        // Update progress
+        {
+            std::lock_guard<std::mutex> lock(mtxI);
+            progressI = position;
+        }
+    }
+
+    // Stop progress thread
+    runningI = false;
+    progressThread.join();
+
+    outputFile.close();
+    std::cout << "\nProcessing complete! Output saved in " << outputCSV << std::endl;
+}

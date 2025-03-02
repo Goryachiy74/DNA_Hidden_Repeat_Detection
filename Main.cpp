@@ -28,8 +28,13 @@ int main(int argc, char** argv)
     // Call your functions here
     // CompareLoadSpeed();
     // MatrixTest();
-    DetectIsochores2(file_path, minSegmentSize, 0.2);
+    //DetectIsochores2(file_path, minSegmentSize, 0.2);
    // SegmentTest(file_path, minSegmentSize, wordSize, lookaheadSize);
+    string inputFile = R"(C:\Braude\Projects\DNA_Hidden_Repeat_Detection\GCF_000001405.40_GRCh38.p14_genomic.fna)";
+    string fastaFileToSave = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
+    string outputFile = "gc_content500.csv";
+    int windowSize = 500000; // 100kb window
+	processFASTATest(fastaFileToSave, windowSize, outputFile);
 
     return 0; // Successful execution
 }

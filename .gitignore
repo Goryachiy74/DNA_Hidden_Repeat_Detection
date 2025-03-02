@@ -361,3 +361,5 @@ MigrationBackup/
 /nugetPack.bat
 *.csv
 *.html
+*.fna
+*.png

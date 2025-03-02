@@ -217,3 +217,18 @@ void DetectIsochores2(std::string filePath, size_t window_size, double gc_thresh
 	auto isochores = detect_isochores2(dnaSequenceFromSaved);
 	saveIsochoresToCsv(isochores, 300000, 100000);
 }
+
+void processFASTATest(const std::string& inputFile, int windowSize, const std::string& outputFile)
+{
+	string sequence = load_previously_saved_data2(inputFile);
+
+	if (sequence.empty()) {
+		cerr << "Error: Loaded sequence is empty!" << endl;
+	}
+
+	// Remove FASTA headers (lines starting with '>')
+	sequence.erase(remove_if(sequence.begin(), sequence.end(), [](char c) { return c == '>' || c == '\n'; }), sequence.end());
+
+	// Process sequence and compute GC content
+	processSequence(sequence, windowSize, outputFile);
+}
