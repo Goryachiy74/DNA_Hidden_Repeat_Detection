@@ -28,7 +28,7 @@ int main(int argc, char** argv)
     // Call your functions here
     // CompareLoadSpeed();
     // MatrixTest();
-    DetectIsochores(file_path, minSegmentSize, 0.5);
+    DetectIsochores2(file_path, minSegmentSize, 0.2);
    // SegmentTest(file_path, minSegmentSize, wordSize, lookaheadSize);
 
     return 0; // Successful execution

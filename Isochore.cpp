@@ -7,6 +7,10 @@ uint64_t progressI = 0.0; // Shared progress variable
 bool runningI = true; // Control variable for the progress thread
 uint64_t totalsizeI = 100;
 
+// Parameters
+const int WINDOW_SIZE = 300000;  // 300 kb
+const int STEP_SIZE = 100000;    // 100 kb
+
 static void updateProgress()
 {
     auto startTime = std::chrono::high_resolution_clock::now(); // Start time
@@ -47,6 +51,17 @@ double calculate_gc_content(const std::string& sequence)
         }
     }
     return gc_count / sequence.size();
+}
+
+// Function to calculate GC content
+double calculateGCContent(const std::string& sequence) {
+    int gcCount = 0;
+    for (char base : sequence) {
+        if (base == 'G' || base == 'C') {
+            gcCount++;
+        }
+    }
+    return (sequence.length() > 0) ? (gcCount * 100.0 / sequence.length()) : 0;
 }
 
 // Function to calculate GC and CG pairs in a given sequence
@@ -158,4 +173,34 @@ void saveIsochoresToCsv(std::vector<Isochore> isochores, size_t window_size, dou
     {
         std::cerr << "Unable to open file for writing." << std::endl;
     }
+}
+
+// Function to detect isochores
+std::vector<Isochore> detect_isochores2(const std::string& genomeSequence) {
+    std::vector<Isochore> isochores;
+    std::thread progressThread(updateProgress);
+
+    for (size_t i = 0; i + WINDOW_SIZE <= genomeSequence.size(); i += STEP_SIZE) {
+        std::string windowSeq = genomeSequence.substr(i, WINDOW_SIZE);
+        double gcContent = calculateGCContent(windowSeq);
+
+        // Update progress every 1000 iterations to reduce mutex locking
+        if (i % 1000 == 0)
+        {
+            std::lock_guard<std::mutex> lock(mtxI);
+            progressI = i; // Update progress
+            totalsizeI = genomeSequence.size();
+        }
+
+        Isochore iso;
+        iso.start = i;
+        iso.end = i + WINDOW_SIZE;
+        iso.gc_content = gcContent;
+
+        isochores.push_back(iso);
+    }
+    // Stop the progress thread
+    runningI = false;
+    progressThread.join(); // Wait for the progress thread to finish
+    return isochores;
 }

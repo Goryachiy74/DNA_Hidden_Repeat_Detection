@@ -204,3 +204,16 @@ void DetectIsochores(std::string filePath, size_t window_size, double gc_thresho
 	auto isochores = detect_isochores(dnaSequenceFromSaved, window_size, gc_threshold);
 	saveIsochoresToCsv(isochores, window_size, gc_threshold);
 }
+
+void DetectIsochores2(std::string filePath, size_t window_size, double gc_threshold)
+{
+	std::cout << "Loading of DNA Started from file : " << filePath << std::endl;
+
+	string dnaSequenceFromSaved = load_previously_saved_data2(filePath);
+
+	std::cout << "DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
+	std::cout << "The Window Size is  : " << window_size << std::endl;
+	std::cout << "The GC threshold is  : " << gc_threshold * 100 << " percents" << std::endl;
+	auto isochores = detect_isochores2(dnaSequenceFromSaved);
+	saveIsochoresToCsv(isochores, 300000, 100000);
+}
