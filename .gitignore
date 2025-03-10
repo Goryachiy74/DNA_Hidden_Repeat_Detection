@@ -5,6 +5,7 @@
 
 *.lib
 *.dll
+*.zip
 
 # User-specific files
 *.rsuser

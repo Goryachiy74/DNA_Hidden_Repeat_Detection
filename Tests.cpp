@@ -2,6 +2,7 @@
 #include "OccurrenceMatrix.h"
 #include "Segment.h"
 #include "Isochore.h"
+#include "GenomDNA.h"
 
 // Function to measure execution time
 template <typename Func>
@@ -231,4 +232,12 @@ void processFASTATest(const std::string& inputFile, int windowSize, const std::s
 
 	// Process sequence and compute GC content
 	processSequence(sequence, windowSize, outputFile);
+}
+
+void testZakhariaCode()
+{
+	std::string filename = R"(C:\Projects\DNA_Hidden_Repeat_Detection\x64\Debug\ncbi_dataset\ncbi_dataset\data\GCF_000001405.40\GCF_000001405.40_GRCh38.p14_genomic.fna)";
+
+	GenomDNA genom;
+	genom.Isoch1_TriplCorel(filename);
 }
