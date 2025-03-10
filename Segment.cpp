@@ -188,3 +188,48 @@ void saveSegmentsToCSV(const std::vector<std::tuple<uint64_t, uint64_t, double, 
 	csvFile.close();
 	std::cout << "Segments saved to " << filename << std::endl;
 }
+
+std::vector<std::tuple<int, int, double, std::string>> loadSegmentsFromCSV(const std::string& filePath)
+{
+	std::vector<std::tuple<int, int, double, std::string>> segments;
+
+	std::ifstream file(filePath);
+	if (!file.is_open()) {
+		throw std::runtime_error("Unable to open file: " + filePath);
+	}
+
+	std::string line;
+	// Skip the header line
+	std::getline(file, line);
+
+	while (std::getline(file, line)) {
+		std::istringstream lineStream(line);
+		std::string cell;
+
+		int start = 0, end = 0, length = 0;
+		double cost = 0.0;
+		std::string bestWord;
+
+		// Parse each column in the row
+		std::getline(lineStream, cell, '\t'); // Read Start
+		start = std::stoi(cell);
+
+		std::getline(lineStream, cell, '\t'); // Read End
+		end = std::stoi(cell);
+
+		std::getline(lineStream, cell, '\t'); // Read Length
+		length = std::stoi(cell);
+
+		std::getline(lineStream, cell, '\t'); // Read Cost
+		cost = std::stod(cell);
+
+		std::getline(lineStream, cell, '\t'); // Read Best Word
+		bestWord = cell;
+
+		// Add the parsed segment to the vector
+		segments.emplace_back(start, end, cost, bestWord);
+	}
+
+	file.close();
+	return segments;
+}
