@@ -36,6 +36,11 @@ int main(int argc, char** argv)
  //   int windowSize = 500000; // 100kb window
 	//processFASTATest(fastaFileToSave, windowSize, outputFile);
 
-  testZakhariaCode();
+  //testZakhariaCode();
+
+	string fastaFile = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
+	//string segmentFile = R"(C:\Braude\Projects\DNA_Hidden_Repeat_Detection\x64\Release\Segments\3\segments_output_2000_3_20000.csv)";
+	//MergeSegmentTest(segmentFile, fastaFile, 2000, 3, 20000);
+	DetectIsochores2(fastaFile, 10000,10000);
     return 0; // Successful execution
 }

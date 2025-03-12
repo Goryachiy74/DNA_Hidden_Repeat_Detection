@@ -9,4 +9,5 @@ void DetectIsochores(std::string filePath, size_t window_size, double gc_thresho
 void DetectIsochores2(std::string filePath, size_t window_size, double gc_threshold);
 void processFASTATest(const std::string& inputFile, int windowSize, const std::string& outputFile);
 void testZakhariaCode();
+void MergeSegmentTest(std::string segmentFilePath, std::string sequanceFilePath, int minSegmentSize, int wordSize, int lookaheadSize);
 

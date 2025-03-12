@@ -216,7 +216,7 @@ void DetectIsochores2(std::string filePath, size_t window_size, double gc_thresh
 	std::cout << "The Window Size is  : " << window_size << std::endl;
 	std::cout << "The GC threshold is  : " << gc_threshold * 100 << " percents" << std::endl;
 	auto isochores = detect_isochores2(dnaSequenceFromSaved);
-	saveIsochoresToCsv(isochores, 300000, 100000);
+	saveIsochoresToCsv(isochores, 10000, 10000);
 }
 
 void processFASTATest(const std::string& inputFile, int windowSize, const std::string& outputFile)
@@ -240,4 +240,34 @@ void testZakhariaCode()
 
 	GenomDNA genom;
 	genom.Isoch1_TriplCorel(filename);
+}
+
+void MergeSegmentTest(std::string segmentFilePath, std::string sequanceFilePath, int minSegmentSize, int wordSize, int lookaheadSize)
+{
+	std::cout << "Loading of DNA Started from file : " << sequanceFilePath << std::endl;
+
+	string dnaSequenceFromSaved = load_previously_saved_data2(sequanceFilePath);
+
+	std::cout << "DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
+
+	std::cout << "The Word Size is  : " << wordSize << std::endl;
+	std::cout << "The Minimum Segment Size is  : " << minSegmentSize * wordSize << " nucleotides" << std::endl;
+	std::cout << "The lookahead Size is  : " << lookaheadSize * wordSize << " nucleotides" << std::endl;
+
+	std::cout << "Loading of Segments started from file : " << segmentFilePath << std::endl;
+
+	auto segments = loadSegmentsFromCSV(segmentFilePath);
+
+	std::cout << "Segments loaded! Number of segments before merge is  : " << segments.size() << std::endl;
+
+	std::cout << "Merge Segments started " << std::endl;
+	auto merged = MergeSimilarSegments(segments, dnaSequenceFromSaved, wordSize);
+
+	std::string fileName = "merged_segments_output_"
+		+ std::to_string(minSegmentSize) + "_"
+		+ std::to_string(wordSize) + "_"
+		+ std::to_string(lookaheadSize) + ".csv";
+
+	saveSegmentsToCSV(merged, fileName);
+
 }
