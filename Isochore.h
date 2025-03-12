@@ -5,6 +5,7 @@
 #include <vector>
 #include <iomanip>
 #include <mutex>
+#include <cinttypes>
 
 struct Isochore {
     size_t start;

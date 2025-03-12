@@ -180,7 +180,7 @@ void saveIsochoresToCsv(std::vector<Isochore> isochores, size_t window_size, dou
 		csv_file << "Start,End,GC_Content\n"; // CSV header
 		for (const Isochore& isochore : isochores)
 		{
-			csv_file << isochore.start << "," << isochore.end << "," << isochore.gc_content << "\n";
+			csv_file << isochore.start << "," << isochore.end << "," << isochore.gc_content << "\n"; 
 		}
 		csv_file.close();
 		std::cout << "Isochores saved to isochores.csv" << std::endl;
@@ -199,21 +199,26 @@ std::vector<Isochore> detect_isochores2(const std::string& genomeSequence)
 	//std::string_view windowSeq(genomeSequence.data() + 0, WINDOW_SIZE);
 	//std::string windowSeq = genomeSequence.substr(i, WINDOW_SIZE);
 	int gcContentCount = calculateGCContent2(genomeSequence.c_str(), 0, WINDOW_SIZE);
-	double gcContent = (gcContentCount * 100) / WINDOW_SIZE;
+	int gcContent = (gcContentCount * 100) / WINDOW_SIZE;
 	Isochore iso;
 	iso.start = 0;
 	iso.end = WINDOW_SIZE;
 	iso.gc_content = gcContent;
 	isochores.push_back(iso);
 
-
+	std::string fileName = "isochores_"
+		+ std::to_string(WINDOW_SIZE) + "_"
+		+ std::to_string(STEP_SIZE) + ".csv";
+	std::ofstream csv_file(fileName);
+	csv_file << "Start,End,GC_Content\n"; // CSV header
+	char buf[128]{ 0 };
 
 	for (size_t i = 0; i + WINDOW_SIZE + STEP_SIZE <= genomeSequence.size(); i += STEP_SIZE)
 	{
 		int gcPrefix = calculateGCContent2(genomeSequence.c_str(), i, STEP_SIZE);
 		int gcSuffix = calculateGCContent2(genomeSequence.c_str(), i + WINDOW_SIZE, STEP_SIZE);
 
-_		gcContentCount = gcContentCount - gcPrefix + gcSuffix;
+		gcContentCount = gcContentCount - gcPrefix + gcSuffix;
 		gcContent = (gcContentCount * 100) / WINDOW_SIZE;
 
 
@@ -225,12 +230,14 @@ _		gcContentCount = gcContentCount - gcPrefix + gcSuffix;
 			totalsizeI = genomeSequence.size();
 		}
 
-		Isochore iso;
-		iso.start = i;
-		iso.end = i + WINDOW_SIZE;
-		iso.gc_content = gcContent;
+		sprintf_s(buf, "%" PRIu64 ", %" PRIu64 ", %d\n", i, i + WINDOW_SIZE, gcContent);
+		csv_file << buf;
+		//Isochore iso;
+		//iso.start = i;
+		//iso.end = i + WINDOW_SIZE;
+		//iso.gc_content = gcContent;
 
-		isochores.push_back(iso);
+		//isochores.push_back(iso);
 
 	}
 	// Stop the progress thread
