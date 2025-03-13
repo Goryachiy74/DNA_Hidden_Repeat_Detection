@@ -38,9 +38,10 @@ int main(int argc, char** argv)
 
   //testZakhariaCode();
 
-	string fastaFile = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
+	//string fastaFile = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
 	//string segmentFile = R"(C:\Braude\Projects\DNA_Hidden_Repeat_Detection\x64\Release\Segments\3\segments_output_2000_3_20000.csv)";
 	//MergeSegmentTest(segmentFile, fastaFile, 2000, 3, 20000);
-	DetectIsochores2(fastaFile, 10000,10000);
+	//DetectIsochores2(fastaFile, 10000,10000);
+	ExtractChromosomesTest();
     return 0; // Successful execution
 }

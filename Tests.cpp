@@ -64,6 +64,14 @@ void TestFasta()
 	}
 }
 
+void ExtractChromosomesTest()
+{
+	string fastaFile = R"(C:\Braude\Projects\ncbi_dataset\ncbi_dataset\data\GCF_000001405.40\GCF_000001405.40_GRCh38.p14_genomic.fna)";
+
+	std::cout << "Loading of DNA Started from file : " << fastaFile << std::endl;
+
+	extract_all_chromosomes(fastaFile);
+}
 
 void CompareLoadSpeed()
 {

@@ -18,3 +18,6 @@ std::string load_previously_saved_data(const std::string& filename);
 
 std::string load_previously_saved_data2(const std::string& filename);
 
+void extract_all_chromosomes(const std::string& filename);
+
+

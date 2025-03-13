@@ -151,3 +151,56 @@ std::string load_previously_saved_data2(const std::string& filePath)
 	file.close(); // Close the file
 	return result; // Return the loaded string
 }
+
+void extract_all_chromosomes(const std::string& filename)
+{
+	std::ifstream file(filename);
+	if (!file)
+	{
+		std::cerr << "Error opening file: " << filename << std::endl;
+		return;
+	}
+
+	std::ofstream outFile;
+	std::string line;
+	std::string current_chromosome;
+
+	while (std::getline(file, line))
+	{
+		if (line[0] == '>') 
+		{  // Found a new chromosome header
+			if (outFile.is_open()) 
+			{
+				outFile.close();  // Close previous chromosome file
+			}
+
+			// Extract chromosome name (remove '>' and take first word)
+			size_t space_pos = line.find(' ');
+			current_chromosome = line.substr(1, space_pos - 1);
+
+			// Open a new file for this chromosome
+			std::string output_filename = current_chromosome + ".fna";
+			outFile.open(output_filename);
+			if (!outFile) 
+			{
+				std::cerr << "Error creating file: " << output_filename << std::endl;
+				continue;
+			}
+
+			outFile << line << std::endl; // Write header to file
+			std::cout << "Saving: " << output_filename << std::endl;
+		}
+		else if (outFile.is_open()) 
+		{
+			outFile << line << std::endl; // Write sequence to file
+		}
+	}
+
+	// Close the last open file
+	if (outFile.is_open())
+	{
+		outFile.close();
+	}
+
+	file.close();
+}
