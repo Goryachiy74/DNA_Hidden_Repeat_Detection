@@ -11,5 +11,7 @@ void processFASTATest(const std::string& inputFile, int windowSize, const std::s
 void testZakhariaCode();
 void MergeSegmentTest(std::string segmentFilePath, std::string sequanceFilePath, int minSegmentSize, int wordSize, int lookaheadSize);
 void ExtractChromosomesTest();
+void ReadChromosome();
+
 
 

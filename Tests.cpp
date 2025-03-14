@@ -73,6 +73,45 @@ void ExtractChromosomesTest()
 	extract_all_chromosomes(fastaFile);
 }
 
+void ReadChromosome()
+{
+	string fastaFile = R"(C:\Braude\Projects\DNA\Chromosome\NC_000001.11.fna)";
+	std::cout << "Loading of Chromosome Started from file : " << fastaFile << std::endl;
+	auto seq = read_chromosome_file(fastaFile);
+
+	std::cout << "DNA loaded! Size of sequence is  : " << seq.size() << std::endl;
+
+	//int minSegmentSize = 2000;
+	//int word_size = 5;
+	//int lookaheadSize = 20000;
+	//int seqSize = 4000000;
+	//std::string firstSeq = dnaSequenceFromSaved.substr(0, seqSize);
+	std::cout << "The Sequence size is  : " << seq.size() << std::endl;
+	std::cout << "The Word Size is  : " << 3 << std::endl;
+	std::cout << "The Minimum Segment Size is  : " << 6000 << " nucleotides" << std::endl;
+	std::cout << "The lookahead Size is  : " << 60000 << " nucleotides" << std::endl;
+
+	auto segments = SegmentDNACostAndWord(seq, 2000, 3, 20000);
+
+	// Print the resulting segments, costs, and best words
+	std::cout << "Segmented DNA sequence with costs and best words:\n";
+	for (const auto& [start, end, cost, bestWord] : segments) {
+		std::cout << "Segment: [" << start << ", " << end << ") -> "
+			<< " len: " << end - start
+			<< " | Cost: " << cost
+			<< " | Best Word: " << bestWord << "\n";
+	}
+
+	std::string fileName = "C:\\Braude\\Projects\\DNA\\segments_output_"
+		+ std::to_string(2000) + "_"
+		+ std::to_string(3) + "_"
+		+ std::to_string(20000) + ".csv";
+	saveSegmentsToCSV(segments, fileName);
+
+
+
+}
+
 void CompareLoadSpeed()
 {
 	string fastaFileToSave = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";

@@ -42,6 +42,7 @@ int main(int argc, char** argv)
 	//string segmentFile = R"(C:\Braude\Projects\DNA_Hidden_Repeat_Detection\x64\Release\Segments\3\segments_output_2000_3_20000.csv)";
 	//MergeSegmentTest(segmentFile, fastaFile, 2000, 3, 20000);
 	//DetectIsochores2(fastaFile, 10000,10000);
-	ExtractChromosomesTest();
+	//ExtractChromosomesTest();
+	ReadChromosome();
     return 0; // Successful execution
 }

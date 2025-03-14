@@ -20,4 +20,9 @@ std::string load_previously_saved_data2(const std::string& filename);
 
 void extract_all_chromosomes(const std::string& filename);
 
+std::string read_chromosome(const std::string& filename, const std::string& chromosome);
+
+std::string read_chromosome_file(const std::string& filename);
+
+
 

@@ -204,3 +204,62 @@ void extract_all_chromosomes(const std::string& filename)
 
 	file.close();
 }
+
+std::string read_chromosome(const std::string& filename, const std::string& chromosome)
+{
+	std::ifstream file(filename);
+	if (!file) {
+		std::cerr << "Error opening file: " << filename << std::endl;
+		return "";
+	}
+
+	std::string line, sequence;
+	bool found = false;
+
+	while (std::getline(file, line)) {
+		if (line[0] == '>') {  // New chromosome header found
+			if (line.find(chromosome) != std::string::npos) {
+				found = true;
+				continue;  // Skip the header itself
+			}
+			else if (found) {
+				break;  // Stop reading when next chromosome starts
+			}
+		}
+		else if (found) {
+			sequence += line;  // Append sequence line
+		}
+	}
+
+	file.close();
+
+	if (!found) {
+		std::cerr << "Chromosome " << chromosome << " not found!" << std::endl;
+	}
+
+	return sequence;
+}
+
+std::string read_chromosome_file(const std::string& filename)
+{
+	std::ifstream file(filename);
+	if (!file) {
+		std::cerr << "Error opening file: " << filename << std::endl;
+		return "";
+	}
+
+	std::string line, sequence;
+	bool first_line = true;
+
+	while (std::getline(file, line)) {
+		if (first_line && line[0] == '>') {
+			first_line = false;  // Skip the header line
+			continue;
+		}
+		sequence += line;  // Append sequence
+	}
+
+	file.close();
+
+	return sequence;
+}
