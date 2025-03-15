@@ -231,7 +231,6 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> loadSegmentsFro
 	return segments;
 }
 
-
 std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> MergeSimilarSegments(
 	const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments,
 	const std::string& sequence,

@@ -11,7 +11,9 @@ void processFASTATest(const std::string& inputFile, int windowSize, const std::s
 void testZakhariaCode();
 void MergeSegmentTest(std::string segmentFilePath, std::string sequanceFilePath, int minSegmentSize, int wordSize, int lookaheadSize);
 void ExtractChromosomesTest();
-void ReadChromosome();
+void ReadChromosome(std::string chromosomeFile, std::string outputFolder, int minSegmentSize, int wordSize, int lookaheadSize);
+void DetectIsochoresInChromosome(std::string chromosomeFile, std::string outputPath);
+void DetectIsochoresInChromosome2(std::string chromosomeFile, std::string outputPath);
 
 
 

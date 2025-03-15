@@ -73,43 +73,53 @@ void ExtractChromosomesTest()
 	extract_all_chromosomes(fastaFile);
 }
 
-void ReadChromosome()
+void DetectIsochoresInCromosome(std::string chromosomeFile, std::string outputFolder, int minSegmentSize, int wordSize, int lookaheadSize)
 {
-	string fastaFile = R"(C:\Braude\Projects\DNA\Chromosome\NC_000001.11.fna)";
-	std::cout << "Loading of Chromosome Started from file : " << fastaFile << std::endl;
-	auto seq = read_chromosome_file(fastaFile);
+	std::cout << "Loading of Chromosome Started from file : " << chromosomeFile << std::endl;
+	auto chromosome = read_chromosome_file(chromosomeFile);
 
-	std::cout << "DNA loaded! Size of sequence is  : " << seq.size() << std::endl;
+	std::cout << "Chromosome loaded! Size of Chromosome is  : " << chromosome.size() << std::endl;
 
-	//int minSegmentSize = 2000;
-	//int word_size = 5;
-	//int lookaheadSize = 20000;
-	//int seqSize = 4000000;
-	//std::string firstSeq = dnaSequenceFromSaved.substr(0, seqSize);
-	std::cout << "The Sequence size is  : " << seq.size() << std::endl;
-	std::cout << "The Word Size is  : " << 3 << std::endl;
-	std::cout << "The Minimum Segment Size is  : " << 6000 << " nucleotides" << std::endl;
-	std::cout << "The lookahead Size is  : " << 60000 << " nucleotides" << std::endl;
+	std::cout << "The Word Size is  : " << wordSize << std::endl;
+	std::cout << "The Minimum Segment Size is  : " << minSegmentSize * wordSize << " nucleotides" << std::endl;
+	std::cout << "The lookahead Size is  : " << lookaheadSize * wordSize << " nucleotides" << std::endl;
+}
 
-	auto segments = SegmentDNACostAndWord(seq, 2000, 3, 20000);
+void ReadChromosome(std::string chromosomeFile, std::string outputFolder, int minSegmentSize, int wordSize, int lookaheadSize)
+{
+	std::cout << "Loading of Chromosome Started from file : " << chromosomeFile << std::endl;
+	auto chromosome = read_chromosome_file(chromosomeFile);
 
-	// Print the resulting segments, costs, and best words
-	std::cout << "Segmented DNA sequence with costs and best words:\n";
-	for (const auto& [start, end, cost, bestWord] : segments) {
-		std::cout << "Segment: [" << start << ", " << end << ") -> "
-			<< " len: " << end - start
-			<< " | Cost: " << cost
-			<< " | Best Word: " << bestWord << "\n";
-	}
+	std::cout << "Chromosome loaded! Size of Chromosome is  : " << chromosome.size() << std::endl;
 
-	std::string fileName = "C:\\Braude\\Projects\\DNA\\segments_output_"
-		+ std::to_string(2000) + "_"
-		+ std::to_string(3) + "_"
-		+ std::to_string(20000) + ".csv";
+	std::cout << "The Word Size is  : " << wordSize << std::endl;
+	std::cout << "The Minimum Segment Size is  : " << minSegmentSize * wordSize << " nucleotides" << std::endl;
+	std::cout << "The lookahead Size is  : " << lookaheadSize * wordSize << " nucleotides" << std::endl;
+
+	auto segments = SegmentDNACostAndWord(chromosome, minSegmentSize, wordSize, lookaheadSize);
+
+	std::string fileName = outputFolder + "segments_output_"
+		+ std::to_string(minSegmentSize) + "_"
+		+ std::to_string(wordSize) + "_"
+		+ std::to_string(lookaheadSize) + ".csv";
 	saveSegmentsToCSV(segments, fileName);
 
+	std::cout << "Segments saved successfully!: " << fileName << std::endl;
 
+	std::cout << "Number of segments before merge is  : " << segments.size() << std::endl;
 
+	std::cout << "Merge Segments started " << std::endl;
+
+	auto merged = MergeSimilarSegments(segments, chromosome, wordSize);
+
+	std::cout << "Number of segments after merge is : " << merged.size() << std::endl;
+
+	std::string mergedFileName = outputFolder + "merged_segments_output_"
+		+ std::to_string(minSegmentSize) + "_"
+		+ std::to_string(wordSize) + "_"
+		+ std::to_string(lookaheadSize) + ".csv";
+
+	saveSegmentsToCSV(merged, mergedFileName);
 }
 
 void CompareLoadSpeed()
@@ -211,11 +221,6 @@ void SegmentTest(std::string filePath, int minSegmentSize, int wordSize, int loo
 
 	std::cout << "DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
 
-	//int minSegmentSize = 2000;
-	//int word_size = 5;
-	//int lookaheadSize = 20000;
-	//int seqSize = 4000000;
-	//std::string firstSeq = dnaSequenceFromSaved.substr(0, seqSize);
 	std::cout << "The Sequence size is  : " << dnaSequenceFromSaved.size() << std::endl;
 	std::cout << "The Word Size is  : " << wordSize << std::endl;
 	std::cout << "The Minimum Segment Size is  : " << minSegmentSize * wordSize << " nucleotides" << std::endl;
@@ -236,8 +241,8 @@ void SegmentTest(std::string filePath, int minSegmentSize, int wordSize, int loo
 		+ std::to_string(minSegmentSize) + "_"
 		+ std::to_string(wordSize) + "_"
 		+ std::to_string(lookaheadSize) + ".csv";
-	saveSegmentsToCSV(segments, fileName);
 
+	saveSegmentsToCSV(segments, fileName);
 }
 
 void DetectIsochores(std::string filePath, size_t window_size, double gc_threshold)
@@ -253,18 +258,25 @@ void DetectIsochores(std::string filePath, size_t window_size, double gc_thresho
 	saveIsochoresToCsv(isochores, window_size, gc_threshold);
 }
 
-void DetectIsochores2(std::string filePath, size_t window_size, double gc_threshold)
+void DetectIsochoresInChromosome(std::string chromosomeFile, std::string outputPath)
 {
-	std::cout << "Loading of DNA Started from file : " << filePath << std::endl;
+	std::cout << "Loading of Chromosome Started from file : " << chromosomeFile << std::endl;
+	auto chromosome = read_chromosome_file(chromosomeFile);
 
-	string dnaSequenceFromSaved = load_previously_saved_data2(filePath);
-
-	std::cout << "DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
-	std::cout << "The Window Size is  : " << window_size << std::endl;
-	std::cout << "The GC threshold is  : " << gc_threshold * 100 << " percents" << std::endl;
-	auto isochores = detect_isochores2(dnaSequenceFromSaved);
-	saveIsochoresToCsv(isochores, 10000, 10000);
+	std::cout << "Chromosome loaded! Size of Chromosome is  : " << chromosome.size() << std::endl;
+	detect_isochores(chromosome, outputPath);
 }
+
+void DetectIsochoresInChromosome2(std::string chromosomeFile, std::string outputPath)
+{
+	std::cout << "Loading of Chromosome Started from file : " << chromosomeFile << std::endl;
+	auto chromosome = read_chromosome_file(chromosomeFile);
+
+	std::cout << "Chromosome loaded! Size of Chromosome is  : " << chromosome.size() << std::endl;
+	detect_isochores_optimized(chromosome, outputPath, WINDOW_SIZE, STEP_SIZE);
+}
+
+
 
 void processFASTATest(const std::string& inputFile, int windowSize, const std::string& outputFile)
 {
