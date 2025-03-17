@@ -232,6 +232,12 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> loadSegmentsFro
 	return segments;
 }
 
+bool MergeCondition(std::string a, std::string b) {
+	if (a.size() != b.size()) return false;
+	// Check if there is a cyclic rotation of a matches b
+	return (a + a).find(b) != std::string::npos;
+}
+
 std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> MergeSimilarSegments(
 	const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments,
 	const std::string& sequence,
@@ -263,7 +269,7 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> MergeSimilarSeg
 		int count = 1; // Count how many segments were merged
 
 		// Merge segments that are consecutive and have the same best word
-		while (i > 0 && std::get<3>(segments[i - 1]) == bestWord && std::get<1>(segments[i - 1]) == start) {
+		while (i > 0 && MergeCondition(std::get<3>(segments[i - 1]), bestWord) && std::get<1>(segments[i - 1]) == start) {
 			--i;
 			start = std::get<0>(segments[i]);
 			++count;
@@ -290,3 +296,4 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> MergeSimilarSeg
 
 	return mergedSegments;
 }
+

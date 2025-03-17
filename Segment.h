@@ -13,6 +13,7 @@
 #include <sstream>
 #include <tuple>
 #include <iomanip> // For std::setprecision and std::fixed
+#include <algorithm>
 #include "OccurrenceMatrix.h"
 
 std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostAndWord(
