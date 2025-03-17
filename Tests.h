@@ -14,6 +14,7 @@ void ExtractChromosomesTest();
 void ReadChromosome(std::string chromosomeFile, std::string outputFolder, int minSegmentSize, int wordSize, int lookaheadSize);
 void DetectIsochoresInChromosome(std::string chromosomeFile, std::string outputPath);
 void DetectIsochoresInChromosome2(std::string chromosomeFile, std::string outputPath);
+void DetectIsochoresInChromosome3(std::string chromosomeFile, std::string outputPath);
 
 
 

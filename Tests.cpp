@@ -66,7 +66,7 @@ void TestFasta()
 
 void ExtractChromosomesTest()
 {
-	string fastaFile = R"(C:\Braude\Projects\ncbi_dataset\ncbi_dataset\data\GCF_000001405.40\GCF_000001405.40_GRCh38.p14_genomic.fna)";
+	string fastaFile = R"(C:\Braude\Projects\DNA\ncbi_dataset_mouse\ncbi_dataset\data\GCF_000001635.27\GCF_000001635.27_GRCm39_genomic.fna)";
 
 	std::cout << "Loading of DNA Started from file : " << fastaFile << std::endl;
 
@@ -276,7 +276,14 @@ void DetectIsochoresInChromosome2(std::string chromosomeFile, std::string output
 	detect_isochores_optimized(chromosome, outputPath, WINDOW_SIZE, STEP_SIZE);
 }
 
+void DetectIsochoresInChromosome3(std::string chromosomeFile, std::string outputPath)
+{
+	std::cout << "Loading of Chromosome Started from file : " << chromosomeFile << std::endl;
+	auto chromosome = read_chromosome_file(chromosomeFile);
 
+	std::cout << "Chromosome loaded! Size of Chromosome is  : " << chromosome.size() << std::endl;
+	runIsochoreDetection(chromosome, outputPath, WINDOW_SIZE, STEP_SIZE);
+}
 
 void processFASTATest(const std::string& inputFile, int windowSize, const std::string& outputFile)
 {

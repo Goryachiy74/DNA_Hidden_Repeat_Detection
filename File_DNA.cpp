@@ -45,7 +45,8 @@ string load_gen_bank_file(const string& filePath)
 	return sequence;
 }
 
-std::string load_fasta_file(const std::string& filename) {
+std::string load_fasta_file(const std::string& filename)
+{
 	std::ifstream fasta_file(filename);
 	std::string sequence;
 
@@ -65,13 +66,13 @@ std::string load_fasta_file(const std::string& filename) {
 		}
 		for (char c : line)
 		{
-			if (c != 'N' && c != 'n')// Exclude 'N'
-			{
+			//if (c != 'N' && c != 'n')// Exclude 'N'
+			//{
 				if (isalpha(c))
 				{
 					sequence += toupper(c);
 				}
-			}
+			//}
 		}
 		// Append the sequence line to the sequence string
 	   // sequence.append(line); // Use append instead of +=
@@ -164,6 +165,7 @@ void extract_all_chromosomes(const std::string& filename)
 	std::ofstream outFile;
 	std::string line;
 	std::string current_chromosome;
+	std::string outputPath = R"(C:\Braude\Projects\DNA\ncbi_dataset_mouse\Chromosomes\)";
 
 	while (std::getline(file, line))
 	{
@@ -179,7 +181,7 @@ void extract_all_chromosomes(const std::string& filename)
 			current_chromosome = line.substr(1, space_pos - 1);
 
 			// Open a new file for this chromosome
-			std::string output_filename = current_chromosome + ".fna";
+			std::string output_filename = outputPath + current_chromosome + ".fna";
 			outFile.open(output_filename);
 			if (!outFile) 
 			{

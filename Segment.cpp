@@ -121,7 +121,8 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 			double totalScore = left.first + right.first;
 
 			// Check if this score is the best so far
-			if (totalScore > bestScore) {
+			if (totalScore > bestScore) 
+			{
 				bestScore = totalScore;
 				bestEnd = currentEnd;
 				bestSegment = left;

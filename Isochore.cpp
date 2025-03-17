@@ -11,7 +11,7 @@ static void updateProgress()
 
 	while (isochoreRunning)
 	{
-		std::this_thread::sleep_for(std::chrono::seconds(1)); // Update every 10 seconds
+		std::this_thread::sleep_for(std::chrono::seconds(1)); // Update every second
 
 		// Lock the mutex to safely access the progress variable
 		std::lock_guard<std::mutex> lock(isochoreMtx);
@@ -174,7 +174,7 @@ void saveIsochoresToCsv(std::vector<Isochore> isochores, size_t window_size, dou
 		csv_file << "Start,End,GC_Content\n"; // CSV header
 		for (const Isochore& isochore : isochores)
 		{
-			csv_file << isochore.start << "," << isochore.end << "," << isochore.gc_content << "\n"; 
+			csv_file << isochore.start << "," << isochore.end << "," << isochore.gc_content << "\n";
 		}
 		csv_file.close();
 		std::cout << "Isochores saved to isochores.csv" << std::endl;
@@ -275,13 +275,13 @@ std::vector<Isochore> detect_isochores(const std::string& genomeSequence)
 double calculateGCContent2(const std::string& sequence)
 {
 	int gcCount = 0, totalCount = 0;
-	for (char base : sequence) 
+	for (char base : sequence)
 	{
 		if (base == 'G' || base == 'C' || base == 'g' || base == 'c')
 		{
 			gcCount++;
 		}
-		if (isalpha(base)) 
+		if (isalpha(base))
 		{ // Ignore non-DNA characters
 			totalCount++;
 		}
@@ -399,21 +399,23 @@ int calculateBaseGC(char base)
 
 void detect_isochores_optimized(const std::string& genomeSequence, const std::string& OutputFolder, uint64_t windowSize, uint64_t stepSize)
 {
-	std::string fileName = OutputFolder + "/isochores_output_"
-		+ std::to_string(windowSize) + "_"
-		+ std::to_string(stepSize) + ".csv";
+	std::string fileName = (fs::path(OutputFolder) /
+		("isochores_output_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
 
 	std::ofstream outfile(fileName);
 	outfile << "Start,End,GC_Content\n";
 
 	uint64_t genomeSize = genomeSequence.size();
-
+	isochoreTotalsize = genomeSize;
 	// Initialize GC content for the first window
 	int gcCount = 0;
 	for (uint64_t i = 0; i < windowSize; i++)
+	{
 		gcCount += calculateBaseGC(genomeSequence[i]);
+	}
 
 	double gcPercentage = (gcCount / (double)windowSize) * 100;
+
 	outfile << 0 << "," << windowSize << "," << gcPercentage << "\n";
 
 	for (uint64_t pos = stepSize; pos + windowSize <= genomeSize; pos += stepSize)
@@ -440,4 +442,19 @@ void detect_isochores_optimized(const std::string& genomeSequence, const std::st
 	}
 
 	outfile.close();
+}
+
+// ==================== Parallelized Wrapper ====================
+void runIsochoreDetection(const std::string& genomeSequence,
+	const std::string& outputFolder,
+	uint64_t windowSize, uint64_t stepSize)
+{
+	// Start progress thread
+	std::thread progressThread(updateProgress);
+
+	detect_isochores_optimized(genomeSequence, outputFolder, windowSize, stepSize);
+
+	// Stop progress thread
+	isochoreRunning = false;
+	progressThread.join();
 }
