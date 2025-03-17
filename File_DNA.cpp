@@ -45,7 +45,8 @@ string load_gen_bank_file(const string& filePath)
 	return sequence;
 }
 
-std::string load_fasta_file(const std::string& filename) {
+std::string load_fasta_file(const std::string& filename)
+{
 	std::ifstream fasta_file(filename);
 	std::string sequence;
 
@@ -65,13 +66,13 @@ std::string load_fasta_file(const std::string& filename) {
 		}
 		for (char c : line)
 		{
-			if (c != 'N' && c != 'n')// Exclude 'N'
-			{
+			//if (c != 'N' && c != 'n')// Exclude 'N'
+			//{
 				if (isalpha(c))
 				{
 					sequence += toupper(c);
 				}
-			}
+			//}
 		}
 		// Append the sequence line to the sequence string
 	   // sequence.append(line); // Use append instead of +=
@@ -150,4 +151,127 @@ std::string load_previously_saved_data2(const std::string& filePath)
 
 	file.close(); // Close the file
 	return result; // Return the loaded string
+}
+
+void extract_all_chromosomes(const std::string& filename)
+{
+	std::ifstream file(filename);
+	if (!file)
+	{
+		std::cerr << "Error opening file: " << filename << std::endl;
+		return;
+	}
+
+	std::ofstream outFile;
+	std::string line;
+	std::string current_chromosome;
+	std::string outputPath = R"(C:\Braude\Projects\DNA\ncbi_dataset_mouse\Chromosomes\)";
+
+	while (std::getline(file, line))
+	{
+		if (line[0] == '>') 
+		{  // Found a new chromosome header
+			if (outFile.is_open()) 
+			{
+				outFile.close();  // Close previous chromosome file
+			}
+
+			// Extract chromosome name (remove '>' and take first word)
+			size_t space_pos = line.find(' ');
+			current_chromosome = line.substr(1, space_pos - 1);
+
+			// Open a new file for this chromosome
+			std::string output_filename = outputPath + current_chromosome + ".fna";
+			outFile.open(output_filename);
+			if (!outFile) 
+			{
+				std::cerr << "Error creating file: " << output_filename << std::endl;
+				continue;
+			}
+
+			outFile << line << std::endl; // Write header to file
+			std::cout << "Saving: " << output_filename << std::endl;
+		}
+		else if (outFile.is_open()) 
+		{
+			outFile << line << std::endl; // Write sequence to file
+		}
+	}
+
+	// Close the last open file
+	if (outFile.is_open())
+	{
+		outFile.close();
+	}
+
+	file.close();
+}
+
+std::string read_chromosome(const std::string& filename, const std::string& chromosome)
+{
+	std::ifstream file(filename);
+	if (!file) 
+	{
+		std::cerr << "Error opening file: " << filename << std::endl;
+		return "";
+	}
+
+	std::string line, sequence;
+	bool found = false;
+
+	while (std::getline(file, line)) 
+	{
+		if (line[0] == '>')
+		{  // New chromosome header found
+			if (line.find(chromosome) != std::string::npos) 
+			{
+				found = true;
+				continue;  // Skip the header itself
+			}
+			else if (found)
+			{
+				break;  // Stop reading when next chromosome starts
+			}
+		}
+		else if (found) 
+		{
+			sequence += line;  // Append sequence line
+		}
+	}
+
+	file.close();
+
+	if (!found) 
+	{
+		std::cerr << "Chromosome " << chromosome << " not found!" << std::endl;
+	}
+
+	return sequence;
+}
+
+std::string read_chromosome_file(const std::string& filename)
+{
+	std::ifstream file(filename);
+	if (!file) 
+	{
+		std::cerr << "Error opening file: " << filename << std::endl;
+		return "";
+	}
+
+	std::string line, sequence;
+	bool first_line = true;
+
+	while (std::getline(file, line)) 
+	{
+		if (first_line && line[0] == '>') 
+		{
+			first_line = false;  // Skip the header line
+			continue;
+		}
+		sequence += line;  // Append sequence
+	}
+
+	file.close();
+
+	return sequence;
 }

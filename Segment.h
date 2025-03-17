@@ -24,3 +24,9 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 );
 
 void saveSegmentsToCSV(const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments, const std::string& filename);
+std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> loadSegmentsFromCSV(const std::string& filePath);
+
+std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> MergeSimilarSegments(
+	const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments,
+	const std::string& sequence,
+	int wordSize);

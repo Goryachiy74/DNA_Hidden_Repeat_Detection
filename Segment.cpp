@@ -9,7 +9,7 @@ static void updateProgress()
 {
 	auto startTime = std::chrono::high_resolution_clock::now(); // Start time
 
-	while (running) 
+	while (running)
 	{
 		std::this_thread::sleep_for(std::chrono::seconds(1)); // Update every 10 seconds
 
@@ -38,9 +38,7 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 	const std::string& sequence,
 	int minSegmentSize,
 	int wordSize,
-	int lookaheadSize/*,
-	const std::function<std::pair<double, std::string>(std::string_view, int)>& costFunction*/
-)
+	int lookaheadSize)
 {
 	std::thread progressThread(updateProgress);
 
@@ -85,7 +83,7 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 			if (currentEnd + rightSegmentSize > n) break; // Prevent out-of-bound errors
 			std::string_view rightSegment(sequence.data() + currentEnd, rightSegmentSize);
 
-			if (leftMatrix.empty() )
+			if (leftMatrix.empty())
 			{
 				leftMatrix = GenerateOccurrenceMatrix(leftSegment, wordSize);
 			}
@@ -97,24 +95,24 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 			{
 				//Left Matrix Calculation
 				uint64_t startOfSegmentToAdd = (currentStart + leftSegmentSize) - wordSize;
-					std::string_view leftSegmentToAdd(sequence.data() + startOfSegmentToAdd, wordSize);
-					auto leftMatrixToAdd = GenerateOccurrenceMatrix(leftSegmentToAdd, wordSize);
-					leftMatrix = sumMatrices(leftMatrix, leftMatrixToAdd);
+				std::string_view leftSegmentToAdd(sequence.data() + startOfSegmentToAdd, wordSize);
+				auto leftMatrixToAdd = GenerateOccurrenceMatrix(leftSegmentToAdd, wordSize);
+				leftMatrix = sumMatrices(leftMatrix, leftMatrixToAdd);
 				//COST FUNC HERE
-					uint64_t startOfSegmentToRemove = (currentEnd - wordSize);
+				uint64_t startOfSegmentToRemove = (currentEnd - wordSize);
 
 				//Right Matrix Calculation
-					std::string_view leftSegmentToRemove(sequence.data() + startOfSegmentToRemove, wordSize);
-					auto leftMatrixToRemove = GenerateOccurrenceMatrix(leftSegmentToRemove, wordSize);
-					rightMatrix = subtractMatrices(rightMatrix, leftMatrixToRemove);
+				std::string_view leftSegmentToRemove(sequence.data() + startOfSegmentToRemove, wordSize);
+				auto leftMatrixToRemove = GenerateOccurrenceMatrix(leftSegmentToRemove, wordSize);
+				rightMatrix = subtractMatrices(rightMatrix, leftMatrixToRemove);
 
-					uint64_t startOfSegmentToAddFromRight = (currentEnd + rightSegmentSize) - wordSize;
-					std::string_view rightSegmentToAdd(sequence.data() + startOfSegmentToAddFromRight, wordSize);
-					auto rightMatrixToAdd = GenerateOccurrenceMatrix(rightSegmentToAdd, wordSize);
-					rightMatrix = sumMatrices(rightMatrix, rightMatrixToAdd);
-					//Cost Function HERE
+				uint64_t startOfSegmentToAddFromRight = (currentEnd + rightSegmentSize) - wordSize;
+				std::string_view rightSegmentToAdd(sequence.data() + startOfSegmentToAddFromRight, wordSize);
+				auto rightMatrixToAdd = GenerateOccurrenceMatrix(rightSegmentToAdd, wordSize);
+				rightMatrix = sumMatrices(rightMatrix, rightMatrixToAdd);
+				//Cost Function HERE
 			}
-			
+
 
 			// Calculate costs for the left and right segments
 			auto left = CalculatePercentageSumAndWord(leftMatrix);
@@ -123,7 +121,8 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 			double totalScore = left.first + right.first;
 
 			// Check if this score is the best so far
-			if (totalScore > bestScore) {
+			if (totalScore > bestScore) 
+			{
 				bestScore = totalScore;
 				bestEnd = currentEnd;
 				bestSegment = left;
@@ -137,7 +136,7 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 		}
 
 		// Backtrace if the maximum was found before the end of the lookahead loop
-		if (bestLookaheadStep < lookaheadSize - 1) 
+		if (bestLookaheadStep < lookaheadSize - 1)
 		{
 			// Backtracking logic can be expanded as needed
 			// For now, simply record the best segment and move on
@@ -187,4 +186,107 @@ void saveSegmentsToCSV(const std::vector<std::tuple<uint64_t, uint64_t, double, 
 
 	csvFile.close();
 	std::cout << "Segments saved to " << filename << std::endl;
+}
+
+std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> loadSegmentsFromCSV(const std::string& filePath)
+{
+	std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> segments;
+
+	std::ifstream file(filePath);
+	if (!file.is_open()) {
+		throw std::runtime_error("Unable to open file: " + filePath);
+	}
+
+	std::string line;
+	// Skip the header line
+	std::getline(file, line);
+
+	while (std::getline(file, line)) {
+		std::istringstream lineStream(line);
+		std::string cell;
+
+		uint64_t start, end;
+		double cost;
+		std::string bestWord;
+
+		// Parse each column using a COMMA (`,`) as the delimiter
+		std::getline(lineStream, cell, ',');
+		start = std::stoull(cell);  // Convert to uint64_t
+
+		std::getline(lineStream, cell, ',');
+		end = std::stoull(cell);  // Convert to uint64_t
+
+		std::getline(lineStream, cell, ',');
+		// Skip Length column (we do not need it)
+
+		std::getline(lineStream, cell, ',');
+		cost = std::stod(cell);  // Convert to double
+
+		std::getline(lineStream, bestWord);  // Read the remaining as bestWord
+
+		// Add the parsed segment to the vector
+		segments.emplace_back(start, end, cost, bestWord);
+	}
+
+	file.close();
+	return segments;
+}
+
+std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> MergeSimilarSegments(
+	const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments,
+	const std::string& sequence,
+	int wordSize)
+{
+
+	if (segments.empty()) {
+		return {};
+	}
+	std::thread progressThread(updateProgress);
+
+
+	std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> mergedSegments;
+	int n = segments.size();
+	int i = n - 1;
+
+	while (i >= 0)
+	{
+		// Lock the mutex to safely update the progress variable
+		if (i % 10 == 0) 
+		{
+			std::lock_guard<std::mutex> lock(mtx);
+			totalsize = n - 1;
+			progress = totalsize - i; // Update progress
+		}
+		uint64_t start = std::get<0>(segments[i]);
+		uint64_t end = std::get<1>(segments[i]);
+		std::string bestWord = std::get<3>(segments[i]);
+		int count = 1; // Count how many segments were merged
+
+		// Merge segments that are consecutive and have the same best word
+		while (i > 0 && std::get<3>(segments[i - 1]) == bestWord && std::get<1>(segments[i - 1]) == start) {
+			--i;
+			start = std::get<0>(segments[i]);
+			++count;
+		}
+
+		// Extract the merged sequence from the original DNA sequence
+		std::string_view mergedSequence(sequence.data() + start, end - start);
+
+		// Generate the new occurrence matrix
+		std::vector<std::vector<int>> newMatrix = GenerateOccurrenceMatrix(mergedSequence, wordSize);
+
+		// Recalculate the new cost and word
+		auto [newCost, newBestWord] = CalculatePercentageSumAndWord(newMatrix);
+
+		// Store the merged segment with the new cost and best word
+		mergedSegments.emplace_back(start, end, newCost, newBestWord);
+		--i;
+	}
+	// Stop the progress thread
+	running = false;
+	progressThread.join(); // Wait for the progress thread to finish
+	// Reverse the vector because we merged from the end
+	std::reverse(mergedSegments.begin(), mergedSegments.end());
+
+	return mergedSegments;
 }
