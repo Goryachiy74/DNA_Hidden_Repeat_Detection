@@ -434,7 +434,7 @@ void detect_isochores_optimized(const std::string& genomeSequence, const std::st
 	for (uint64_t pos = stepSize; pos + windowSize <= genomeSize; pos += stepSize)
 	{
 		// Subtract the base exiting the left side of the window
-		for (uint64_t i = pos - stepSize; i < pos; i++) 
+		for (uint64_t i = pos - stepSize; i < pos; i++)
 		{
 			gcCount -= calculateBaseGC(genomeSequence[i]);
 			unknownCount -= isUnknownBase(genomeSequence[i]);
@@ -479,4 +479,175 @@ void runIsochoreDetection(const std::string& genomeSequence,
 	// Stop progress thread
 	isochoreRunning = false;
 	progressThread.join();
+}
+
+// Function to find overlap between isochores and segments
+std::vector<Overlap> findIsochoreSegmentOverlap(
+	const std::vector<Isochore>& isochores,
+	const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments,
+	int& singleSegmentIsochores,
+	double& singleSegmentGCSum,
+	double& totalCostSum,
+	double& maxCost,
+	double& minCost,
+	std::map<std::string, int>& wordFrequency)
+{
+	std::vector<Overlap> overlaps;
+	singleSegmentIsochores = 0;
+	singleSegmentGCSum = 0;
+	totalCostSum = 0;
+	maxCost = -1;
+	minCost = 1e9;
+
+	for (const auto& iso : isochores) {
+		// Find overlapping segments
+		std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> overlappingSegments;
+		for (const auto& seg : segments)
+		{
+			uint64_t seg_start = get<0>(seg);
+			uint64_t seg_end = get<1>(seg);
+
+			if (seg_start < iso.end && seg_end > iso.start)
+			{
+				overlappingSegments.push_back(seg);
+			}
+		}
+
+		// If exactly one segment creates this isochore
+		if (overlappingSegments.size() == 1)
+		{
+			singleSegmentIsochores++;
+			singleSegmentGCSum += iso.gc_content;
+		}
+
+		// Add all overlaps to result
+		for (const auto& seg : overlappingSegments)
+		{
+			uint64_t seg_start = get<0>(seg);
+			uint64_t seg_end = get<1>(seg);
+			double seg_cost = get<2>(seg);
+			std::string best_word = get<3>(seg);
+
+			uint64_t overlapStart = std::max(iso.start, seg_start);
+			uint64_t overlapEnd = std::min(iso.end, seg_end);
+			uint64_t overlapLength = overlapEnd - overlapStart;
+
+			overlaps.push_back({
+				iso.start, iso.end, iso.gc_content,
+				seg_start, seg_end, seg_cost,
+				best_word, overlapLength
+				});
+
+			// Track cost stats
+			totalCostSum += seg_cost;
+			maxCost = std::max(maxCost, seg_cost);
+			minCost = std::min(minCost, seg_cost);
+
+			// Track best word frequency
+			wordFrequency[best_word]++;
+		}
+	}
+
+	return overlaps;
+}
+
+// ---- 1. Load Isochores from CSV ----
+vector<Isochore> loadIsochores(const string& filename)
+{
+	vector<Isochore> isochores;
+	ifstream file(filename);
+
+	if (!file.is_open()) {
+		cerr << "Error: Unable to open file " << filename << "\n";
+		return isochores;
+	}
+
+	string line;
+	getline(file, line); // Skip header line
+
+	while (getline(file, line)) 
+	{
+		stringstream ss(line);
+		string field;
+		Isochore iso;
+
+		getline(ss, field, ',');
+		iso.start = stoull(field);
+
+		getline(ss, field, ',');
+		iso.end = stoull(field);
+
+		getline(ss, field, ',');
+		iso.gc_content = stod(field);
+
+		isochores.push_back(iso);
+	}
+
+	file.close();
+	return isochores;
+}
+
+// ---- 2. Save Overlaps to CSV ----
+void saveOverlapsToCSV(const string& filename, const vector<Overlap>& overlaps)
+{
+	ofstream file(filename);
+
+	if (!file.is_open()) 
+	{
+		cerr << "Error: Unable to create file " << filename << "\n";
+		return;
+	}
+
+	// Write header
+	file << "Isochore Start,Isochore End,Isochore GC,Segment Start,Segment End,Segment Cost,Best Word,Overlap Length\n";
+
+	// Write data
+	for (const auto& o : overlaps) {
+		file << o.isochore_start << ","
+			<< o.isochore_end << ","
+			<< o.isochore_gc << ","
+			<< o.segment_start << ","
+			<< o.segment_end << ","
+			<< o.segment_cost << ","
+			<< o.best_word << ","
+			<< o.overlap_length << "\n";
+	}
+
+	file.close();
+	cout << "Overlaps saved to " << filename << "\n";
+}
+
+// ---- 3. Save Statistics to File ----
+void saveStatisticsToFile(
+	const string& filename,
+	int totalIsochores,
+	int singleSegmentIsochores,
+	double avgGCContentSingleSegment,
+	double avgCost,
+	double maxCost,
+	double minCost,
+	const string& mostFrequentWord,
+	int wordFrequency)
+{
+	ofstream file(filename);
+
+	if (!file.is_open()) {
+		cerr << "Error: Unable to create file " << filename << "\n";
+		return;
+	}
+
+	file << "--- Statistics ---\n";
+	file << "Total Isochores: " << totalIsochores << "\n";
+	file << "Isochores Created by Single Segment: " << singleSegmentIsochores << "\n";
+	file << "Percentage of Single Segment Isochores: "
+		<< (singleSegmentIsochores * 100.0) / totalIsochores << "%\n";
+	file << "Average GC Content of Single Segment Isochores: " << avgGCContentSingleSegment << "\n";
+	file << "Average Segment Cost: " << avgCost << "\n";
+	file << "Max Segment Cost: " << maxCost << "\n";
+	file << "Min Segment Cost: " << minCost << "\n";
+	file << "Most Frequent Best Word: " << mostFrequentWord
+		<< " (" << wordFrequency << " times)\n";
+
+	file.close();
+	cout << "Statistics saved to " << filename << "\n";
 }

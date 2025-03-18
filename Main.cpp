@@ -219,7 +219,7 @@ void processChromosome(const std::string& chromosomeFile, int minSegmentSize, in
 	runIsochoreDetection(chromosome, outputPath, windowSize, stepSize);
 
 
-	std::cout << "The Word Size is  : " << wordSize << std::endl;
+	std::cout << "\nThe Word Size is  : " << wordSize << std::endl;
 	std::cout << "The Minimum Segment Size is  : " << minSegmentSize * wordSize << " nucleotides" << std::endl;
 	std::cout << "The lookahead Size is  : " << lookaheadSize * wordSize << " nucleotides" << std::endl;
 
@@ -238,12 +238,47 @@ void processChromosome(const std::string& chromosomeFile, int minSegmentSize, in
 
 	auto merged = MergeSimilarSegments(segments, chromosome, wordSize);
 
-	std::cout << "Number of segments after merge is : " << merged.size() << std::endl;
+	std::cout << "\nNumber of segments after merge is : " << merged.size() << std::endl;
 
 	std::string mergedFileName = (fs::path(outputPath) /
 		("merged_segments_output_" + std::to_string(minSegmentSize) + "_" + std::to_string(wordSize) + "_" + std::to_string(lookaheadSize) + ".csv")).string();
 
 	saveSegmentsToCSV(merged, mergedFileName);
+
+	int singleSegmentIsochores = 0;
+	double singleSegmentGCSum = 0;
+	double totalCostSum = 0;
+	double maxCost = 0;
+	double minCost = 0;
+	map<string, int> wordFrequency;
+
+	std::string isochoresFileName = (fs::path(outputPath) /
+		("isochores_output_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
+
+	auto isochores = loadIsochores(isochoresFileName);
+
+	// Find overlaps
+	vector<Overlap> overlaps = findIsochoreSegmentOverlap(
+		isochores, segments, singleSegmentIsochores,
+		singleSegmentGCSum, totalCostSum, maxCost,
+		minCost, wordFrequency
+	);
+
+	std::string overlapsFileName = (fs::path(outputPath) /
+		("overlaps_isochores_output_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
+
+	// Save to CSV
+	saveOverlapsToCSV(overlapsFileName, overlaps);
+
+	std::string statisticsFileName = (fs::path(outputPath) /
+		("statistics_overlaps_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
+
+	// Save statistics
+	saveStatisticsToFile(statisticsFileName, isochores.size(),
+		singleSegmentIsochores, singleSegmentGCSum / singleSegmentIsochores,
+		totalCostSum / overlaps.size(), maxCost, minCost,
+		wordFrequency.begin()->first, wordFrequency.begin()->second);
+
 }
 
 //int main(int argc, char** argv)
