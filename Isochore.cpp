@@ -397,6 +397,12 @@ int calculateBaseGC(char base)
 	return (base == 'G' || base == 'C') ? 1 : 0;
 }
 
+// Function to count unknown characters separately
+int isUnknownBase(char base)
+{
+	return (base != 'A' && base != 'T' && base != 'G' && base != 'C');
+}
+
 void detect_isochores_optimized(const std::string& genomeSequence, const std::string& OutputFolder, uint64_t windowSize, uint64_t stepSize)
 {
 	std::string fileName = (fs::path(OutputFolder) /
@@ -409,26 +415,42 @@ void detect_isochores_optimized(const std::string& genomeSequence, const std::st
 	isochoreTotalsize = genomeSize;
 	// Initialize GC content for the first window
 	int gcCount = 0;
+	int unknownCount = 0;
+
+	// Initialize GC content and unknown characters for the first window
 	for (uint64_t i = 0; i < windowSize; i++)
 	{
 		gcCount += calculateBaseGC(genomeSequence[i]);
+		unknownCount += isUnknownBase(genomeSequence[i]);
 	}
 
-	double gcPercentage = (gcCount / (double)windowSize) * 100;
+	// Only normalize by valid bases (exclude unknown characters)
+	double gcPercentage = (unknownCount < windowSize)
+		? (gcCount / (double)(windowSize - unknownCount)) * 100.0
+		: 0.0;
 
 	outfile << 0 << "," << windowSize << "," << gcPercentage << "\n";
 
 	for (uint64_t pos = stepSize; pos + windowSize <= genomeSize; pos += stepSize)
 	{
-		// Subtract the GC content exiting from left
-		for (uint64_t i = pos - stepSize; i < pos; i++)
+		// Subtract the base exiting the left side of the window
+		for (uint64_t i = pos - stepSize; i < pos; i++) 
+		{
 			gcCount -= calculateBaseGC(genomeSequence[i]);
+			unknownCount -= isUnknownBase(genomeSequence[i]);
+		}
 
-		// Add GC content entering from right
+		// Add the base entering the right side of the window
 		for (uint64_t i = pos + windowSize - stepSize; i < pos + windowSize; i++)
+		{
 			gcCount += calculateBaseGC(genomeSequence[i]);
+			unknownCount += isUnknownBase(genomeSequence[i]);
+		}
 
-		double gcContentPercentage = (double)gcCount / windowSize * 100.0;
+		// Normalize only over valid bases (exclude unknown characters)
+		double gcContentPercentage = (unknownCount < windowSize)
+			? (gcCount / (double)(windowSize - unknownCount)) * 100.0
+			: 0.0;
 
 		outfile << pos << "," << (pos + windowSize) << "," << gcContentPercentage << "\n";
 

@@ -228,6 +228,8 @@ void processChromosome(const std::string& chromosomeFile, int minSegmentSize, in
 	std::string fileName = (fs::path(outputPath) /
 		("segments_output_" + std::to_string(minSegmentSize) + "_" + std::to_string(wordSize) + "_" + std::to_string(lookaheadSize) + ".csv")).string();
 
+	saveSegmentsToCSV(segments, fileName);
+
 	std::cout << "Segments saved successfully!: " << fileName << std::endl;
 
 	std::cout << "Number of segments before merge is  : " << segments.size() << std::endl;
