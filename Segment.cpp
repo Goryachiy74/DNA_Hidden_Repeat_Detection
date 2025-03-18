@@ -118,7 +118,8 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 			auto left = CalculatePercentageSumAndWord(leftMatrix);
 			auto right = CalculatePercentageSumAndWord(rightMatrix);
 
-			double totalScore = left.first/leftSegmentSize + right.first/rightSegmentSize;
+			//double totalScore = left.first/leftSegmentSize + right.first/rightSegmentSize;
+			double totalScore = left.first  + right.first;
 
 			// Check if this score is the best so far
 			if (totalScore > bestScore) 
