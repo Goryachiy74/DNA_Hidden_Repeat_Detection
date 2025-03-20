@@ -8,6 +8,9 @@
 #include <cinttypes>
 #include <filesystem>
 #include <map>
+#include <thread>
+#include <chrono> 
+#include <cstdio>
 using namespace std;
 namespace fs = std::filesystem;
 
