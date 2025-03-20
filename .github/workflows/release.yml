@@ -6,40 +6,34 @@ on:
       - 'master'  # Trigger only on push to master branch
 
 permissions:
-  contents: write  # Allow creating releases
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Step 1: Check out repository code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ✅ Step 2: Install dependencies (CMake, Make, GCC)
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake
 
-      # ✅ Step 3: Clean up existing build directory
       - name: Clean up existing build directory
         run: |
           if [ -d "build" ]; then rm -rf build; fi
 
-      # ✅ Step 4: Create build directory
       - name: Create Build Directory
         run: mkdir build
 
-      # ✅ Step 5: Build the project using CMake and Make
       - name: Build Project
         run: |
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
           make
 
-      # ✅ Step 6: Upload Build Artifacts (for download in release)
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -51,25 +45,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Step 1: Check out repository code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ✅ Step 2: Download the build artifact
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
           name: dna-hidden-repeat-detector
           path: build/
 
-      # ✅ Step 3: Create a GitHub release with the artifacts
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             build/**
-          tag_name: ${{ github.sha }}
-          name: Release ${{ github.sha }}
+          tag_name: ${{ github.ref_name }}  # ✅ Use branch name as tag
+          name: Release ${{ github.ref_name }}
           body: |
             ## Changes in this release:
             - Auto-generated release using GitHub Actions.
