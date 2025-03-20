@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 # Project name and supported languages
 project(DNA_Hidden_Repeat_Detection LANGUAGES CXX)
 
-# ✅ Set C++ standard to C++17 (or higher if needed)
+# ✅ Set C++ standard to C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -44,8 +44,9 @@ elseif(CMAKE_BUILD_TYPE MATCHES Release)
     target_compile_definitions(dna-hidden-repeat-detector PRIVATE NDEBUG)
 endif()
 
-# ✅ Enable strict warnings
+# ✅ Enable strict warnings for better code quality
 if (MSVC)
+    # ✅ MSVC-specific warning flags (strict)
     target_compile_options(dna-hidden-repeat-detector PRIVATE /W4)
 else()
     target_compile_options(dna-hidden-repeat-detector PRIVATE -Wall -Wextra -pedantic)
@@ -53,13 +54,17 @@ endif()
 
 # ✅ Set optimization flags for Release builds
 if(CMAKE_BUILD_TYPE MATCHES Release)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+    if (MSVC)
+        # ✅ Enable full optimization for MSVC
+        target_compile_options(dna-hidden-repeat-detector PRIVATE /O2)
+    else()
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+    endif()
 endif()
 
-# ✅ Windows-specific configuration
-if(WIN32)
-    message(STATUS "Building for Windows")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+# ✅ Windows-specific configuration for MSVC
+if(WIN32 AND MSVC)
+    message(STATUS "Building for Windows using MSVC")
     target_compile_definitions(dna-hidden-repeat-detector PRIVATE _WIN32)
 endif()
 
