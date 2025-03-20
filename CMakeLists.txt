@@ -17,11 +17,22 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Include header files
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-# Find all source files automatically
+# ✅ Fix: Use absolute paths for source files
 file(GLOB_RECURSE SOURCES
-    src/*.cpp
-    include/*.h
+    ${PROJECT_SOURCE_DIR}/src/*.cpp
+    ${PROJECT_SOURCE_DIR}/include/*.h
 )
+
+# ✅ Debug: Show which files are detected
+message(STATUS "Sources found:")
+foreach(SOURCE ${SOURCES})
+    message(STATUS "  ${SOURCE}")
+endforeach()
+
+# ✅ Ensure that sources are found, otherwise throw an error
+if (NOT SOURCES)
+    message(FATAL_ERROR "No source files found! Check paths or file names.")
+endif()
 
 # Define the executable name
 add_executable(dna-hidden-repeat-detector ${SOURCES})
