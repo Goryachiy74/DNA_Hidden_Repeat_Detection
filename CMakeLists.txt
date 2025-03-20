@@ -4,26 +4,26 @@ cmake_minimum_required(VERSION 3.10)
 # Project name and supported languages
 project(DNA_Hidden_Repeat_Detection LANGUAGES CXX)
 
-# Set C++ standard to C++17
+# ✅ Set C++ standard to C++17 (or higher if needed)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Set output directories for binary files
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# ✅ Set output directories for binary files
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# Include header files
+# ✅ Include header files from the current root directory
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-# ✅ Fix: Exclude CMake-generated files
+# ✅ Find all source files (.cpp and .h) recursively
 file(GLOB_RECURSE SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/*.h
 )
 
-# ✅ Remove CMake-generated files from the list
+# ✅ Exclude CMake-generated files from the build
 list(FILTER SOURCES EXCLUDE REGEX ".*CMakeFiles.*")
 list(FILTER SOURCES EXCLUDE REGEX ".*CompilerIdCXX.*")
 
@@ -50,14 +50,17 @@ elseif(CMAKE_BUILD_TYPE MATCHES Release)
     target_compile_definitions(dna-hidden-repeat-detector PRIVATE NDEBUG)
 endif()
 
-# ✅ Enable strict warnings
+# ✅ Enable strict warnings for better code quality
 if (MSVC)
     target_compile_options(dna-hidden-repeat-detector PRIVATE /W4)
 else()
     target_compile_options(dna-hidden-repeat-detector PRIVATE -Wall -Wextra -pedantic)
 endif()
 
-# ✅ Optional: Set optimization flags for Release builds
+# ✅ Link standard libraries (if needed)
+# target_link_libraries(dna-hidden-repeat-detector PRIVATE <library_name>)
+
+# ✅ Set optimization flags for Release builds
 if(CMAKE_BUILD_TYPE MATCHES Release)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 endif()
@@ -69,7 +72,7 @@ install(TARGETS dna-hidden-repeat-detector
     ARCHIVE DESTINATION lib
 )
 
-# ✅ Clean command
+# ✅ Clean command (optional)
 add_custom_target(clean-all
     COMMAND ${CMAKE_MAKE_PROGRAM} clean
     COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_BINARY_DIR}"

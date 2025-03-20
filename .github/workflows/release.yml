@@ -3,7 +3,7 @@ name: Create Release Pipeline
 on:
   push:
     branches:
-      - 'master'  # Trigger only on push to master branch
+      - 'master'  # ✅ Trigger only on push to master branch
 
 permissions:
   contents: write
@@ -13,40 +13,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ✅ Fix shallow clone issue
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      # ✅ Debug repository structure
+      - name: Debug repository structure
+        run: |
+          echo "Listing files in the repository:"
+          ls -R .
+
+      # ✅ Install dependencies
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake
 
+      # ✅ Clean up existing build directory
       - name: Clean up existing build directory
         run: |
           if [ -d "build" ]; then rm -rf build; fi
 
+      # ✅ Create Build Directory
       - name: Create Build Directory
         run: mkdir build
 
+      # ✅ Build Project
       - name: Build Project
         run: |
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
           make
 
-      # ✅ Debug step to check generated files
+      # ✅ Debug build output
       - name: Debug Build Files
         run: |
           echo "Listing build directory:"
-          ls -l build/
+          ls -R build/
 
-      # ✅ Upload only the executable, not CMake files!
+      # ✅ Upload artifact (fix path)
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dna-hidden-repeat-detector
-          path: |
-            build/dna-hidden-repeat-detector  # ✅ Ensure the file exists!
+          path: build/dna-hidden-repeat-detector  # ✅ Fix output path!
+          if-no-files-found: error  # ✅ Fail if no binary is found
 
   release:
     needs: build
@@ -55,19 +68,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      # ✅ Download artifact
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
           name: dna-hidden-repeat-detector
           path: build/
 
-      # ✅ Upload only the final executable in the release
+      # ✅ Create Release
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            build/dna-hidden-repeat-detector  # ✅ Ensure the file exists!
+            build/dna-hidden-repeat-detector
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
