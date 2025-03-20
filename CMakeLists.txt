@@ -4,13 +4,13 @@ cmake_minimum_required(VERSION 3.10)
 # Project name and supported languages
 project(DNA_Hidden_Repeat_Detection LANGUAGES CXX)
 
-# ✅ Set C++ standard to C++17
-set(CMAKE_CXX_STANDARD 17)
+# ✅ Set C++ standard to C++20 (since Visual Studio 2022 fully supports C++20)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # ✅ Set output directories for binary files
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
@@ -65,7 +65,23 @@ endif()
 # ✅ Windows-specific configuration for MSVC
 if(WIN32 AND MSVC)
     message(STATUS "Building for Windows using MSVC")
+
+    # ✅ Add _WIN32 definition to ensure Windows compatibility
     target_compile_definitions(dna-hidden-repeat-detector PRIVATE _WIN32)
+
+    # ✅ Explicitly link filesystem library
+    target_link_libraries(dna-hidden-repeat-detector PRIVATE stdc++fs)
+
+    # ✅ Force static linking of MSVC runtime (for standalone executable)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
+
+    # ✅ Force filesystem linking (this fixes the std::filesystem error)
+    target_compile_options(dna-hidden-repeat-detector PRIVATE /std:c++20)
+    target_link_options(dna-hidden-repeat-detector PRIVATE /INCLUDE:__std_fs__)
+
+    # ✅ Enable whole program optimization
+    target_compile_options(dna-hidden-repeat-detector PRIVATE /GL)
+    target_link_options(dna-hidden-repeat-detector PRIVATE /LTCG)
 endif()
 
 # ✅ Install target for 'make install'

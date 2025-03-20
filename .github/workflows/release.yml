@@ -9,37 +9,6 @@ permissions:
   contents: write
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Install Dependencies (Linux)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake
-
-      - name: Create Build Directory
-        run: mkdir -p build
-
-      - name: Build Project (Linux)
-        run: |
-          cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
-          make
-
-      - name: Debug Build Output (Linux)
-        run: ls -R build/
-
-      - name: Upload Linux Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dna-hidden-repeat-detector-linux
-          path: build/dna-hidden-repeat-detector
-          if-no-files-found: error
-
   build-windows:
     runs-on: windows-latest
 
@@ -49,17 +18,18 @@ jobs:
 
       - name: Install Dependencies (Windows)
         run: |
-          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          choco install mingw
+          choco install cmake
+          choco install visualstudio2022buildtools --version=17.10
+          choco install visualstudio2022-workload-vctools
 
       - name: Create Build Directory
         run: mkdir build
 
-      - name: Build Project (Windows)
+      - name: Build Project (Windows with MSVC)
         run: |
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles"
-          mingw32-make
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release
 
       - name: Debug Build Output (Windows)
         run: dir build\
@@ -68,22 +38,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dna-hidden-repeat-detector-windows
-          path: build/dna-hidden-repeat-detector.exe
+          path: build/Release/dna-hidden-repeat-detector.exe
           if-no-files-found: error
 
   release:
-    needs: [build-linux, build-windows]
+    needs: build-windows
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
-      - name: Download Linux Build
-        uses: actions/download-artifact@v4
-        with:
-          name: dna-hidden-repeat-detector-linux
-          path: build/linux/
 
       - name: Download Windows Build
         uses: actions/download-artifact@v4
@@ -95,13 +59,13 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            build/linux/dna-hidden-repeat-detector
             build/windows/dna-hidden-repeat-detector.exe
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
             ## Changes in this release:
-            - Linux and Windows builds generated using GitHub Actions.
+            - Built with MSVC for better Windows compatibility.
+            - Direct executable — no external dependencies.
           draft: false
           prerelease: false
         env:
