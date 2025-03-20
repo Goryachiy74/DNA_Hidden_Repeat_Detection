@@ -26,8 +26,9 @@ jobs:
 
     - name: Build Project
       run: |
+        mkdir build
         cd build
-        cmake ..
+        cmake .. -DCMAKE_BUILD_TYPE=Release
         make
 
     - name: Upload Build Artifacts
