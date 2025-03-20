@@ -267,7 +267,7 @@ vector<Isochore> loadIsochores(const string& filename)
 	string line;
 	getline(file, line); // Skip header line
 
-	while (getline(file, line)) 
+	while (getline(file, line))
 	{
 		stringstream ss(line);
 		string field;
@@ -297,7 +297,7 @@ void saveOverlapsToCSV(const string& filename, const vector<Overlap>& overlaps)
 {
 	ofstream file(filename);
 
-	if (!file.is_open()) 
+	if (!file.is_open())
 	{
 		cerr << "Error: Unable to create file " << filename << "\n";
 		return;
@@ -513,7 +513,9 @@ void detect_isochores(const std::string& genomeSequence, const std::string& Outp
 			isochoreTotalsize = genomeSequence.size();
 		}
 
-		sprintf_s(buf, "%" PRIu64 ", %" PRIu64 ", %d\n", i, i + WINDOW_SIZE, gcContent);
+		//part of the C++ standard library and cross-platform
+		snprintf(buf, sizeof(buf), "%" PRIu64 ", %" PRIu64 ", %d\n", i, i + WINDOW_SIZE, gcContent);
+
 		csv_file << buf;
 
 	}
@@ -559,7 +561,8 @@ std::vector<Isochore> detect_isochores(const std::string& genomeSequence)
 			isochoreTotalsize = genomeSequence.size();
 		}
 
-		sprintf_s(buf, "%" PRIu64 ", %" PRIu64 ", %d\n", i, i + WINDOW_SIZE, gcContent);
+		// part of the C++ standard library and cross-platform
+		snprintf(buf, sizeof(buf), "%" PRIu64 ", %" PRIu64 ", %d\n", i, i + WINDOW_SIZE, gcContent);
 		csv_file << buf;
 
 	}
@@ -622,7 +625,8 @@ void processFASTA2(const std::string& filename, int windowSize, const std::strin
 
 		sequence += line; // Append sequence data
 
-		while (sequence.size() >= windowSize) {
+		while (sequence.size() >= static_cast<size_t>(windowSize))
+		{
 			std::string window = sequence.substr(0, windowSize);
 			double gcContent = calculateGCContent(window);
 
