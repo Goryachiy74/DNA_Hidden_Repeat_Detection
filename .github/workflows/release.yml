@@ -5,7 +5,7 @@ on:
     branches:
       - 'master'
   workflow_dispatch:
-  
+
 permissions:
   contents: write
 
@@ -17,29 +17,32 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # ✅ Remove unneeded installs (MSVC is pre-installed)
       - name: Install Dependencies (Windows)
         run: |
-          choco install cmake
-          choco install visualstudio2022buildtools --version=17.10
-          choco install visualstudio2022-workload-vctools
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' --no-progress
 
+      # ✅ Create Build Directory
       - name: Create Build Directory
         run: mkdir build
 
+      # ✅ Build with MSVC (Windows)
       - name: Build Project (Windows with MSVC)
         run: |
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release
 
+      # ✅ Debug Build Output
       - name: Debug Build Output (Windows)
-        run: dir build\
+        run: dir build\bin\Release
 
+      # ✅ Fix Artifact Upload Path
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: dna-hidden-repeat-detector-windows
-          path: build/Release/dna-hidden-repeat-detector.exe
+          path: build/bin/Release/dna-hidden-repeat-detector.exe
           if-no-files-found: error
 
   release:
@@ -50,23 +53,32 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # ✅ Fix Download Path
       - name: Download Windows Build
         uses: actions/download-artifact@v4
         with:
           name: dna-hidden-repeat-detector-windows
           path: build/windows/
 
+      # ✅ Create Dynamic Tag Name (based on commit hash or timestamp)
+      - name: Generate Tag Name
+        id: generate_tag
+        run: |
+          TAG_NAME="v$(date +'%Y%m%d-%H%M%S')"
+          echo "tag_name=$TAG_NAME" >> $GITHUB_ENV
+
+      # ✅ Create GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            build/windows/dna-hidden-repeat-detector.exe
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          files: build/windows/dna-hidden-repeat-detector.exe
+          tag_name: ${{ env.tag_name }}
+          name: Release ${{ env.tag_name }}
           body: |
-            ## Changes in this release:
+            ## 🚀 Changes in this release:
             - Built with MSVC for better Windows compatibility.
             - Direct executable — no external dependencies.
+            - Enhanced stability and speed.
           draft: false
           prerelease: false
         env:
