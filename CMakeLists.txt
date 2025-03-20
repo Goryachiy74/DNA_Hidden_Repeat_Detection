@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 # Project name and supported languages
 project(DNA_Hidden_Repeat_Detection LANGUAGES CXX)
 
-# Set C++ standard to C++17 (or C++20 if preferred)
+# Set C++ standard to C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -14,19 +14,23 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# ✅ Include header files from current root directory
+# Include header files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-# ✅ Find all source files directly from the root
+# ✅ Fix: Exclude CMake-generated files
 file(GLOB_RECURSE SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/*.h
 )
 
-# ✅ Debug: Show which files are detected
-message(STATUS "Current Source Directory: ${CMAKE_CURRENT_SOURCE_DIR}")
+# ✅ Remove CMake-generated files from the list
+list(FILTER SOURCES EXCLUDE REGEX ".*CMakeFiles.*")
+list(FILTER SOURCES EXCLUDE REGEX ".*CompilerIdCXX.*")
+
+# ✅ Debug output to confirm sources
+message(STATUS "Sources found:")
 foreach(SOURCE ${SOURCES})
-    message(STATUS "  Found Source: ${SOURCE}")
+    message(STATUS "  ${SOURCE}")
 endforeach()
 
 # ✅ Ensure that sources are found, otherwise throw an error
@@ -34,10 +38,10 @@ if (NOT SOURCES)
     message(FATAL_ERROR "No source files found! Check paths or file names.")
 endif()
 
-# Define the executable name
+# ✅ Define the executable name
 add_executable(dna-hidden-repeat-detector ${SOURCES})
 
-# Add debug/release flags
+# ✅ Add debug/release flags
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     message("Building in Debug Mode")
     target_compile_definitions(dna-hidden-repeat-detector PRIVATE DEBUG)
@@ -46,29 +50,26 @@ elseif(CMAKE_BUILD_TYPE MATCHES Release)
     target_compile_definitions(dna-hidden-repeat-detector PRIVATE NDEBUG)
 endif()
 
-# Enable compiler warnings for stricter code checking
+# ✅ Enable strict warnings
 if (MSVC)
     target_compile_options(dna-hidden-repeat-detector PRIVATE /W4)
 else()
     target_compile_options(dna-hidden-repeat-detector PRIVATE -Wall -Wextra -pedantic)
 endif()
 
-# Link required libraries (if any)
-# target_link_libraries(dna-hidden-repeat-detector PRIVATE <library_name>)
-
-# Optional: Set optimization flags for Release builds
+# ✅ Optional: Set optimization flags for Release builds
 if(CMAKE_BUILD_TYPE MATCHES Release)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 endif()
 
-# Install target for 'make install' (optional)
+# ✅ Install target for 'make install'
 install(TARGETS dna-hidden-repeat-detector
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
 )
 
-# Add 'make clean' command (optional)
+# ✅ Clean command
 add_custom_target(clean-all
     COMMAND ${CMAKE_MAKE_PROGRAM} clean
     COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_BINARY_DIR}"

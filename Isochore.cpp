@@ -86,8 +86,8 @@ void detect_isochores_optimized(const std::string& genomeSequence, const std::st
 	}
 
 	// Only normalize by valid bases (exclude unknown characters)
-	double gcPercentage = (unknownCount < windowSize)
-		? (gcCount / (double)(windowSize - unknownCount)) * 100.0
+	double gcPercentage = (unknownCount < static_cast<int>(windowSize))
+		? (gcCount / static_cast<double>(windowSize - unknownCount)) * 100.0
 		: 0.0;
 
 	outfile << 0 << "," << windowSize << "," << gcPercentage << "\n";

@@ -285,7 +285,7 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> MergeSimilarSeg
 
 	std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> mergedSegments;
 	size_t  n = segments.size();
-	size_t  i = n - 1;
+	int   i = n - 1;
 
 	while (i >= 0)
 	{
