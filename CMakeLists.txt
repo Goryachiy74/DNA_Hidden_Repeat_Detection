@@ -14,19 +14,19 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# Include header files
-include_directories(${PROJECT_SOURCE_DIR}/include)
+# ✅ Include header files from current root directory
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-# ✅ Fix: Use absolute paths for source files
+# ✅ Find all source files directly from the root
 file(GLOB_RECURSE SOURCES
-    ${PROJECT_SOURCE_DIR}/src/*.cpp
-    ${PROJECT_SOURCE_DIR}/include/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.h
 )
 
 # ✅ Debug: Show which files are detected
-message(STATUS "Sources found:")
+message(STATUS "Current Source Directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 foreach(SOURCE ${SOURCES})
-    message(STATUS "  ${SOURCE}")
+    message(STATUS "  Found Source: ${SOURCE}")
 endforeach()
 
 # ✅ Ensure that sources are found, otherwise throw an error
