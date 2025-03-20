@@ -1,4 +1,6 @@
 #pragma once
+#include <limits>
+#include <chrono>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -15,6 +17,11 @@
 #include <iomanip> // For std::setprecision and std::fixed
 #include <algorithm>
 #include "OccurrenceMatrix.h"
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4244) // Disable int-to-char conversion warning
+#pragma warning(disable : 4267) // Disable size_t-to-int conversion warning
+#endif
 
 /// <summary>
 /// Segments a DNA sequence based on calculated costs and best words.

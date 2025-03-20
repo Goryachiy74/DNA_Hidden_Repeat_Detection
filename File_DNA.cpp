@@ -38,7 +38,7 @@ string load_gen_bank_file(const string& filePath)
 				{
 					if (isalpha(c))
 					{
-						sequence += toupper(c);
+						sequence += static_cast<char>(toupper(c));
 					}
 				}
 			}
@@ -79,7 +79,7 @@ std::string load_fasta_file(const std::string& filename)
 			//{
 				if (isalpha(c))
 				{
-					sequence += toupper(c);
+					sequence += static_cast<char>(toupper(c));
 				}
 			//}
 		}

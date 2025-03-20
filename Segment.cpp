@@ -73,7 +73,7 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 		}
 
 		double bestScore = -1.0; // Track the best score in the current lookahead window
-		uint64_t bestEnd = -1;        // Track the ending position of the best segment
+		uint64_t bestEnd = 0;        // Track the ending position of the best segment
 		std::pair<double, std::string> bestSegment;
 		int bestLookaheadStep = 0; // Track how far into the lookahead the max was found
 
@@ -153,7 +153,7 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 		}
 
 		// Add the best left segment to the results and move the current start position
-		if (bestEnd != -1)
+		if (bestEnd != 0)
 		{
 			segments.emplace_back(currentStart, bestEnd, bestSegment.first, bestSegment.second);
 			currentStart = bestEnd; // Move the start position to the end of the best segment

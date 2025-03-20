@@ -139,7 +139,7 @@ std::pair<double, std::string> CalculatePercentageSumAndWord(const std::vector<s
 {
 	double totalSum = 0.0;           // Variable to store the total percentage sum
 	std::string representativeWord(matrix[0].size(), ' ');            // String to store the word with the best scores
-	size_t  numColumns = matrix[0].size(); // Number of columns (word size)
+	int numColumns = static_cast<int>(matrix[0].size());// Number of columns (word size)
 
 	char DNATabReverse[4] = { 0 };
 	DNATabReverse[0] = 'A';

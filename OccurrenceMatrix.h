@@ -6,6 +6,11 @@
 
 using namespace std;
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4244) // Disable int-to-char conversion warning
+#pragma warning(disable : 4267) // Disable size_t-to-int conversion warning
+#endif
+
 /// <summary>
 /// Generates an occurrence matrix for DNA sequences.
 /// </summary>
