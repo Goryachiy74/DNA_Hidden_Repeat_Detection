@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 # Project name and supported languages
 project(DNA_Hidden_Repeat_Detection LANGUAGES CXX)
 
-# ✅ Set C++ standard to C++20 (for MSVC)
+# ✅ Set C++ standard to C++20
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -69,15 +69,11 @@ if(WIN32 AND MSVC)
     # ✅ Add _WIN32 definition to ensure Windows compatibility
     target_compile_definitions(dna-hidden-repeat-detector PRIVATE _WIN32)
 
-    # ✅ Remove stdc++fs (MSVC does not need it!)
-    # target_link_libraries(dna-hidden-repeat-detector PRIVATE stdc++fs) ❌ REMOVE THIS LINE ❌
+    # ✅ Remove filesystem linking — MSVC handles it automatically!
+    # target_link_options(dna-hidden-repeat-detector PRIVATE /INCLUDE:__std_fs__) ❌ REMOVE THIS LINE ❌
 
     # ✅ Force static linking of MSVC runtime (for standalone executable)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
-
-    # ✅ Force filesystem linking (fix std::filesystem issues)
-    target_compile_options(dna-hidden-repeat-detector PRIVATE /std:c++20)
-    target_link_options(dna-hidden-repeat-detector PRIVATE /INCLUDE:__std_fs__)
 
     # ✅ Enable whole program optimization
     target_compile_options(dna-hidden-repeat-detector PRIVATE /GL)
