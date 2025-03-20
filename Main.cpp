@@ -2,8 +2,6 @@
 #include <string>   // Required for std::string
 #include <cstdlib>  // Required for std::atoi
 #include "File_DNA.h"
-#include "Tests.h"
-#include <unordered_map>
 
 #include "Isochore.h"
 #include "Segment.h"
@@ -157,7 +155,6 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-
 // ======================== Sample Processing Functions ========================
 void processFullDna(const std::string& filePath, int minSegmentSize, int wordSize, int lookaheadSize, uint64_t windowSize, uint64_t stepSize, const std::string& outputPath)
 {
@@ -173,7 +170,7 @@ void processFullDna(const std::string& filePath, int minSegmentSize, int wordSiz
 	std::cout << "Step size is : " << stepSize << std::endl;
 	runIsochoreDetection(dnaSequence, outputPath, windowSize, stepSize);
 
-	std::cout << "The Word Size is  : " << wordSize << std::endl;
+	std::cout << "\nThe Word Size is  : " << wordSize << std::endl;
 	std::cout << "The Minimum Segment Size is  : " << minSegmentSize * wordSize << " nucleotides" << std::endl;
 	std::cout << "The lookahead Size is  : " << lookaheadSize * wordSize << " nucleotides" << std::endl;
 
@@ -244,67 +241,41 @@ void processChromosome(const std::string& chromosomeFile, int minSegmentSize, in
 		("merged_segments_output_" + std::to_string(minSegmentSize) + "_" + std::to_string(wordSize) + "_" + std::to_string(lookaheadSize) + ".csv")).string();
 
 	saveSegmentsToCSV(merged, mergedFileName);
+	// Section for creation overlaps and statistics disabled
 
-	int singleSegmentIsochores = 0;
-	double singleSegmentGCSum = 0;
-	double totalCostSum = 0;
-	double maxCost = 0;
-	double minCost = 0;
-	map<string, int> wordFrequency;
+	//int singleSegmentIsochores = 0;
+	//double singleSegmentGCSum = 0;
+	//double totalCostSum = 0;
+	//double maxCost = 0;
+	//double minCost = 0;
+	//map<string, int> wordFrequency;
 
-	std::string isochoresFileName = (fs::path(outputPath) /
-		("isochores_output_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
+	//std::string isochoresFileName = (fs::path(outputPath) /
+	//	("isochores_output_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
 
-	auto isochores = loadIsochores(isochoresFileName);
+	//auto isochores = loadIsochores(isochoresFileName);
 
-	// Find overlaps
-	vector<Overlap> overlaps = findIsochoreSegmentOverlap(
-		isochores, segments, singleSegmentIsochores,
-		singleSegmentGCSum, totalCostSum, maxCost,
-		minCost, wordFrequency
-	);
+	//// Find overlaps
+	//vector<Overlap> overlaps = findIsochoreSegmentOverlap(
+	//	isochores, segments, singleSegmentIsochores,
+	//	singleSegmentGCSum, totalCostSum, maxCost,
+	//	minCost, wordFrequency
+	//);
 
-	std::string overlapsFileName = (fs::path(outputPath) /
-		("overlaps_isochores_output_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
+	//std::string overlapsFileName = (fs::path(outputPath) /
+	//	("overlaps_isochores_output_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
 
-	// Save to CSV
-	saveOverlapsToCSV(overlapsFileName, overlaps);
+	//// Save to CSV
+	//saveOverlapsToCSV(overlapsFileName, overlaps);
 
-	std::string statisticsFileName = (fs::path(outputPath) /
-		("statistics_overlaps_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
+	//std::string statisticsFileName = (fs::path(outputPath) /
+	//	("statistics_overlaps_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
 
-	// Save statistics
-	saveStatisticsToFile(statisticsFileName, isochores.size(),
-		singleSegmentIsochores, singleSegmentGCSum / singleSegmentIsochores,
-		totalCostSum / overlaps.size(), maxCost, minCost,
-		wordFrequency.begin()->first, wordFrequency.begin()->second);
+	//// Save statistics
+	//saveStatisticsToFile(statisticsFileName, isochores.size(),
+	//	singleSegmentIsochores, singleSegmentGCSum / singleSegmentIsochores,
+	//	totalCostSum / overlaps.size(), maxCost, minCost,
+	//	wordFrequency.begin()->first, wordFrequency.begin()->second);
 
 }
 
-//int main(int argc, char** argv)
-//{
-//	// Call your functions here
-// //   // CompareLoadSpeed();
-// //   // MatrixTest();
-// //   //DetectIsochores2(file_path, minSegmentSize, 0.2);
-// //  // SegmentTest(file_path, minSegmentSize, wordSize, lookaheadSize);
-// //   string inputFile = R"(C:\Braude\Projects\DNA_Hidden_Repeat_Detection\GCF_000001405.40_GRCh38.p14_genomic.fna)";
-// //   string fastaFileToSave = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
-// //   string outputFile = "gc_content500.csv";
-// //   int windowSize = 500000; // 100kb window
-//	//processFASTATest(fastaFileToSave, windowSize, outputFile);
-//
-//  //testZakhariaCode();
-//
-//	//string fastaFile = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
-//	//string segmentFile = R"(C:\Braude\Projects\DNA_Hidden_Repeat_Detection\x64\Release\Segments\3\segments_output_2000_3_20000.csv)";
-//	//MergeSegmentTest(segmentFile, fastaFile, 2000, 3, 20000);
-//	//DetectIsochores2(fastaFile, 10000,10000);
-//	//ExtractChromosomesTest();
-//	string outputFolder = R"(C:\Braude\Projects\DNA\OldDna\Isochores)";
-//	DetectIsochoresInChromosome3(file_path, outputFolder);
-//	//DetectIsochoresInChromosome2(file_path, outputFolder);
-//	//DetectIsochoresInChromosome(file_path, outputFolder);
-//	//ReadChromosome(file_path, outputFolder, minSegmentSize, wordSize, lookaheadSize);
-//	return 0; // Successful execution
-//}

@@ -1,10 +1,13 @@
 #include "Segment.h"
 
 std::mutex mtx; // Mutex for thread safety
-uint64_t progress = 0.0; // Shared progress variable
+uint64_t progress = static_cast<uint64_t>(0.0); // Shared progress variable
 bool running = true; // Control variable for the progress thread
 uint64_t totalsize = 100;
 
+/// <summary>
+/// Function to update and display progress at regular intervals.
+/// </summary>
 static void updateProgress()
 {
 	auto startTime = std::chrono::high_resolution_clock::now(); // Start time
@@ -14,7 +17,7 @@ static void updateProgress()
 		std::this_thread::sleep_for(std::chrono::seconds(1)); // Update every 10 seconds
 
 		// Lock the mutex to safely access the progress variable
-		std::lock_guard<std::mutex> lock(mtx);
+		std::lock_guard<std::mutex> lock(mtx);// Ensure thread safety while accessing shared variables
 		double percentage = (static_cast<double>(progress) / totalsize) * 100;
 
 		// Calculate elapsed time
@@ -34,6 +37,14 @@ static void updateProgress()
 	}
 }
 
+/// <summary>
+/// Segments a DNA sequence based on calculated costs and best words.
+/// </summary>
+/// <param name="sequence">The DNA sequence to segment.</param>
+/// <param name="minSegmentSize">Minimum size of each segment (in words).</param>
+/// <param name="wordSize">Size of each word in nucleotides.</param>
+/// <param name="lookaheadSize">Number of steps to look ahead when searching for optimal segments.</param>
+/// <returns>A vector of tuples containing start, end, cost, and best word for each segment.</returns>
 std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostAndWord(
 	const std::string& sequence,
 	int minSegmentSize,
@@ -51,8 +62,6 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 	uint64_t currentStart = 0; // Starting position of the current segment
 	uint64_t n = sequence.size();
 	std::vector<std::vector<int>> leftMatrix, rightMatrix, bestRightMatrix;
-
-
 
 	while (currentStart < n)
 	{
@@ -164,6 +173,11 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 	return segments;
 }
 
+/// <summary>
+/// Saves segmented DNA data to a CSV file.
+/// </summary>
+/// <param name="segments">Vector of tuples containing segment data.</param>
+/// <param name="filename">Path to the output CSV file.</param>
 void saveSegmentsToCSV(const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments, const std::string& filename)
 {
 	std::ofstream csvFile(filename);
@@ -189,6 +203,11 @@ void saveSegmentsToCSV(const std::vector<std::tuple<uint64_t, uint64_t, double, 
 	std::cout << "Segments saved to " << filename << std::endl;
 }
 
+/// <summary>
+/// Loads segmented DNA data from a CSV file.
+/// </summary>
+/// <param name="filePath">Path to the CSV file.</param>
+/// <returns>Vector of tuples containing segment data.</returns>
 std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> loadSegmentsFromCSV(const std::string& filePath)
 {
 	std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> segments;
@@ -233,12 +252,25 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> loadSegmentsFro
 	return segments;
 }
 
+/// <summary>
+/// Checks if two DNA sequences are cyclic rotations of each other.
+/// </summary>
+/// <param name="a">First DNA sequence.</param>
+/// <param name="b">Second DNA sequence.</param>
+/// <returns>True if b is a cyclic rotation of a; otherwise, false.</returns>
 bool MergeCondition(std::string a, std::string b) {
 	if (a.size() != b.size()) return false;
 	// Check if there is a cyclic rotation of a matches b
 	return (a + a).find(b) != std::string::npos;
 }
 
+/// <summary>
+/// Merges consecutive similar DNA segments based on cyclic rotation and similarity.
+/// </summary>
+/// <param name="segments">Vector of segments (start, end, cost, best word).</param>
+/// <param name="sequence">Original DNA sequence.</param>
+/// <param name="wordSize">Size of each word in nucleotides.</param>
+/// <returns>Vector of merged segments with recalculated costs and best words.</returns>
 std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> MergeSimilarSegments(
 	const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments,
 	const std::string& sequence,
@@ -252,8 +284,8 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> MergeSimilarSeg
 
 
 	std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> mergedSegments;
-	int n = segments.size();
-	int i = n - 1;
+	size_t  n = segments.size();
+	size_t  i = n - 1;
 
 	while (i >= 0)
 	{

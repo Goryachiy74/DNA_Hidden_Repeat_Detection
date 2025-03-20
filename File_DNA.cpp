@@ -2,7 +2,11 @@
 
 #include <vector>
 
-//GenBank files contain metadata and sequence data. The actual DNA sequence is usually in the ORIGIN section.
+/// <summary>
+/// Loads a DNA sequence from a GenBank file.
+/// </summary>
+/// <param name="filePath">Path to the GenBank file.</param>
+/// <returns>The extracted DNA sequence as a string.</returns>
 string load_gen_bank_file(const string& filePath)
 {
 	ifstream file(filePath);
@@ -45,6 +49,11 @@ string load_gen_bank_file(const string& filePath)
 	return sequence;
 }
 
+/// <summary>
+/// Loads a DNA sequence from a FASTA file.
+/// </summary>
+/// <param name="filename">Path to the FASTA file.</param>
+/// <returns>The extracted DNA sequence as a string.</returns>
 std::string load_fasta_file(const std::string& filename)
 {
 	std::ifstream fasta_file(filename);
@@ -82,6 +91,11 @@ std::string load_fasta_file(const std::string& filename)
 	return sequence; // Return the complete sequence
 }
 
+/// <summary>
+/// Saves DNA sequence data to a file.
+/// </summary>
+/// <param name="filename">Path to the output file.</param>
+/// <param name="data">DNA sequence to save.</param>
 void save_loaded_data_as_file(const std::string& filename, const std::string& data)
 {
 	// Create an output file stream
@@ -101,6 +115,11 @@ void save_loaded_data_as_file(const std::string& filename, const std::string& da
 	}
 }
 
+/// <summary>
+/// Loads previously saved DNA sequence from a file.
+/// </summary>
+/// <param name="filename">Path to the file containing saved DNA sequence.</param>
+/// <returns>DNA sequence as a string.</returns>
 std::string load_previously_saved_data(const std::string& filename)
 {
 	// Create an input file stream
@@ -130,11 +149,16 @@ std::string load_previously_saved_data(const std::string& filename)
 
 }
 
-std::string load_previously_saved_data2(const std::string& filePath)
+/// <summary>
+/// Loads previously saved DNA sequence from a file using binary mode.
+/// </summary>
+/// <param name="filename">Path to the file.</param>
+/// <returns>DNA sequence as a string.</returns>
+std::string load_previously_saved_data_binary_mode(const std::string& filename)
 {
-	std::ifstream file(filePath, std::ios::in | std::ios::binary); // Open in binary mode
+	std::ifstream file(filename, std::ios::in | std::ios::binary); // Open in binary mode
 	if (!file) {
-		std::cerr << "Error opening file: " << filePath << std::endl;
+		std::cerr << "Error opening file: " << filename << std::endl;
 		return ""; // Return an empty string on error
 	}
 
@@ -153,6 +177,10 @@ std::string load_previously_saved_data2(const std::string& filePath)
 	return result; // Return the loaded string
 }
 
+/// <summary>
+/// Extracts all chromosomes from a FASTA file and saves them as individual files.
+/// </summary>
+/// <param name="filename">Path to the input file.</param>
 void extract_all_chromosomes(const std::string& filename)
 {
 	std::ifstream file(filename);
@@ -207,6 +235,12 @@ void extract_all_chromosomes(const std::string& filename)
 	file.close();
 }
 
+/// <summary>
+/// Reads a specific chromosome from a FASTA file.
+/// </summary>
+/// <param name="filename">Path to the FASTA file.</param>
+/// <param name="chromosome">Name of the chromosome to extract.</param>
+/// <returns>DNA sequence of the chromosome as a string.</returns>
 std::string read_chromosome(const std::string& filename, const std::string& chromosome)
 {
 	std::ifstream file(filename);
@@ -249,6 +283,11 @@ std::string read_chromosome(const std::string& filename, const std::string& chro
 	return sequence;
 }
 
+/// <summary>
+/// Reads a chromosome from a file.
+/// </summary>
+/// <param name="filename">Path to the file.</param>
+/// <returns>DNA sequence as a string.</returns>
 std::string read_chromosome_file(const std::string& filename)
 {
 	std::ifstream file(filename);

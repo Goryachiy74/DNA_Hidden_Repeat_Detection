@@ -2,7 +2,6 @@
 #include "OccurrenceMatrix.h"
 #include "Segment.h"
 #include "Isochore.h"
-#include "GenomDNA.h"
 
 // Function to measure execution time
 template <typename Func>
@@ -136,7 +135,7 @@ void CompareLoadSpeed()
 
 	std::cout << "(2)Loading of DNA Started from file : " << fastaFileToSave << std::endl;
 	auto start2 = std::chrono::high_resolution_clock::now(); // Start time
-	string dnaSequenceFromSaved2 = load_previously_saved_data2(fastaFileToSave);
+	string dnaSequenceFromSaved2 = load_previously_saved_data_binary_mode(fastaFileToSave);
 	auto end2 = std::chrono::high_resolution_clock::now(); // End time
 	std::chrono::duration<double, std::milli> duration2 = end2 - start2;
 	double timeB = duration2.count();
@@ -175,7 +174,7 @@ void MatrixTest()
 	string fastaFile = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
 	std::cout << "(1)Loading of DNA Started from file : " << fastaFile << std::endl;
 
-	string dnaSequenceFromSaved = load_previously_saved_data2(fastaFile);
+	string dnaSequenceFromSaved = load_previously_saved_data_binary_mode(fastaFile);
 
 	std::cout << "(1)DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
 
@@ -217,7 +216,7 @@ void SegmentTest(std::string filePath, int minSegmentSize, int wordSize, int loo
 	//string fastaFile = R"(C:\Braude\Projects\DNA\GCF_000001405.40_GRCh38.p14_genomic.txt)";
 	std::cout << "Loading of DNA Started from file : " << filePath << std::endl;
 
-	string dnaSequenceFromSaved = load_previously_saved_data2(filePath);
+	string dnaSequenceFromSaved = load_previously_saved_data_binary_mode(filePath);
 
 	std::cout << "DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
 
@@ -249,7 +248,7 @@ void DetectIsochores(std::string filePath, size_t window_size, double gc_thresho
 {
 	std::cout << "Loading of DNA Started from file : " << filePath << std::endl;
 
-	string dnaSequenceFromSaved = load_previously_saved_data2(filePath);
+	string dnaSequenceFromSaved = load_previously_saved_data_binary_mode(filePath);
 
 	std::cout << "DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
 	std::cout << "The Window Size is  : " << window_size << std::endl;
@@ -287,7 +286,7 @@ void DetectIsochoresInChromosome3(std::string chromosomeFile, std::string output
 
 void processFASTATest(const std::string& inputFile, int windowSize, const std::string& outputFile)
 {
-	string sequence = load_previously_saved_data2(inputFile);
+	string sequence = load_previously_saved_data_binary_mode(inputFile);
 
 	if (sequence.empty()) {
 		cerr << "Error: Loaded sequence is empty!" << endl;
@@ -300,19 +299,11 @@ void processFASTATest(const std::string& inputFile, int windowSize, const std::s
 	processSequence(sequence, windowSize, outputFile);
 }
 
-void testZakhariaCode()
-{
-	std::string filename = R"(C:\Projects\DNA_Hidden_Repeat_Detection\x64\Debug\ncbi_dataset\ncbi_dataset\data\GCF_000001405.40\GCF_000001405.40_GRCh38.p14_genomic.fna)";
-
-	GenomDNA genom;
-	genom.Isoch1_TriplCorel(filename);
-}
-
 void MergeSegmentTest(std::string segmentFilePath, std::string sequanceFilePath, int minSegmentSize, int wordSize, int lookaheadSize)
 {
 	std::cout << "Loading of DNA Started from file : " << sequanceFilePath << std::endl;
 
-	string dnaSequenceFromSaved = load_previously_saved_data2(sequanceFilePath);
+	string dnaSequenceFromSaved = load_previously_saved_data_binary_mode(sequanceFilePath);
 
 	std::cout << "DNA loaded! Size of sequence is  : " << dnaSequenceFromSaved.size() << std::endl;
 
