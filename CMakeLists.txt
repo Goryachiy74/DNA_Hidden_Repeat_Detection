@@ -14,10 +14,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# ✅ Include header files from the current root directory
+# ✅ Include header files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-# ✅ Find all source files (.cpp and .h) recursively
+# ✅ Find all source files
 file(GLOB_RECURSE SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/*.h
@@ -26,12 +26,6 @@ file(GLOB_RECURSE SOURCES
 # ✅ Exclude CMake-generated files from the build
 list(FILTER SOURCES EXCLUDE REGEX ".*CMakeFiles.*")
 list(FILTER SOURCES EXCLUDE REGEX ".*CompilerIdCXX.*")
-
-# ✅ Debug output to confirm sources
-message(STATUS "Sources found:")
-foreach(SOURCE ${SOURCES})
-    message(STATUS "  ${SOURCE}")
-endforeach()
 
 # ✅ Ensure that sources are found, otherwise throw an error
 if (NOT SOURCES)
@@ -50,19 +44,23 @@ elseif(CMAKE_BUILD_TYPE MATCHES Release)
     target_compile_definitions(dna-hidden-repeat-detector PRIVATE NDEBUG)
 endif()
 
-# ✅ Enable strict warnings for better code quality
+# ✅ Enable strict warnings
 if (MSVC)
     target_compile_options(dna-hidden-repeat-detector PRIVATE /W4)
 else()
     target_compile_options(dna-hidden-repeat-detector PRIVATE -Wall -Wextra -pedantic)
 endif()
 
-# ✅ Link standard libraries (if needed)
-# target_link_libraries(dna-hidden-repeat-detector PRIVATE <library_name>)
-
 # ✅ Set optimization flags for Release builds
 if(CMAKE_BUILD_TYPE MATCHES Release)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+endif()
+
+# ✅ Windows-specific configuration
+if(WIN32)
+    message(STATUS "Building for Windows")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    target_compile_definitions(dna-hidden-repeat-detector PRIVATE _WIN32)
 endif()
 
 # ✅ Install target for 'make install'
