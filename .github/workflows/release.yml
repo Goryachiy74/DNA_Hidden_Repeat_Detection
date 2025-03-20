@@ -34,13 +34,19 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=Release
           make
 
+      # ✅ Debug step to check generated files
+      - name: Debug Build Files
+        run: |
+          echo "Listing build directory:"
+          ls -l build/
+
       # ✅ Upload only the executable, not CMake files!
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dna-hidden-repeat-detector
           path: |
-            build/dna-hidden-repeat-detector  # ✅ Upload only the executable
+            build/dna-hidden-repeat-detector  # ✅ Ensure the file exists!
 
   release:
     needs: build
@@ -61,7 +67,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            build/dna-hidden-repeat-detector  # ✅ Upload only the executable
+            build/dna-hidden-repeat-detector  # ✅ Ensure the file exists!
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
