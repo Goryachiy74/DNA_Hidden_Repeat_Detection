@@ -157,3 +157,11 @@ Contributions are welcome! Open an issue or submit a pull request.
 
 ## 📄 License
 MIT License. See `LICENSE` for details.
+
+---
+
+## 🌍 Author
+**[Maxim Goryachev]** – [GitHub Profile](https://github.com/Goryachiy74)  
+📧 **Contact:** goryachiy74@gmail.com  
+
+---
