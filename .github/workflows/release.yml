@@ -34,11 +34,13 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=Release
           make
 
+      # ✅ Upload only the executable, not CMake files!
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dna-hidden-repeat-detector
-          path: build/**
+          path: |
+            build/dna-hidden-repeat-detector  # ✅ Upload only the executable
 
   release:
     needs: build
@@ -54,12 +56,13 @@ jobs:
           name: dna-hidden-repeat-detector
           path: build/
 
+      # ✅ Upload only the final executable in the release
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            build/**
-          tag_name: ${{ github.ref_name }}  # ✅ Use branch name as tag
+            build/dna-hidden-repeat-detector  # ✅ Upload only the executable
+          tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
             ## Changes in this release:
