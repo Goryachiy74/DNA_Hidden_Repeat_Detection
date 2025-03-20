@@ -45,8 +45,44 @@ jobs:
           path: build/bin/Release/dna-hidden-repeat-detector.exe
           if-no-files-found: error
 
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # ✅ Install Dependencies for Linux (GCC, CMake)
+      - name: Install Dependencies (Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ make
+
+      # ✅ Create Build Directory
+      - name: Create Build Directory
+        run: mkdir -p build
+
+      # ✅ Build with GCC (Linux)
+      - name: Build Project (Linux with GCC)
+        run: |
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j$(nproc)
+
+      # ✅ Debug Build Output
+      - name: Debug Build Output (Linux)
+        run: ls -al build/
+
+      # ✅ Upload Linux Artifact
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dna-hidden-repeat-detector-linux
+          path: build/dna-hidden-repeat-detector
+          if-no-files-found: error
+
   release:
-    needs: build-windows
+    needs: [build-windows, build-linux] # ✅ Wait for both builds to complete
     runs-on: ubuntu-latest
 
     steps:
@@ -59,6 +95,13 @@ jobs:
         with:
           name: dna-hidden-repeat-detector-windows
           path: build/windows/
+
+      # ✅ Download Linux Build
+      - name: Download Linux Build
+        uses: actions/download-artifact@v4
+        with:
+          name: dna-hidden-repeat-detector-linux
+          path: build/linux/
 
       # ✅ Create Dynamic Tag Name (based on commit hash or timestamp)
       - name: Generate Tag Name
@@ -76,9 +119,10 @@ jobs:
           name: Release ${{ env.tag_name }}
           body: |
             ## 🚀 Changes in this release:
-            - Built with MSVC for better Windows compatibility.
+            - Built with MSVC for Windows and GCC for Linux.
             - Direct executable — no external dependencies.
             - Enhanced stability and speed.
+            - Enhanced compatibility across platforms.           
           draft: false
           prerelease: false
         env:
