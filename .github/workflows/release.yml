@@ -1,0 +1,67 @@
+name: Create Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger only when pushing a tag starting with 'v'
+
+permissions:
+  contents: write  # Allow creating releases
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake
+
+    - name: Create Build Directory
+      run: mkdir build
+
+    - name: Build Project
+      run: |
+        cd build
+        cmake ..
+        make
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dna-hidden-repeat-detector
+        path: build/**
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: dna-hidden-repeat-detector
+        path: build/
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          build/**
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
+        body: |
+          ## Changes in this release:
+          - Auto-generated release using GitHub Actions.
+          - Built using CMake and Make.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
