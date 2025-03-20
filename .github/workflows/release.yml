@@ -2,8 +2,8 @@ name: Create Release Pipeline
 
 on:
   push:
-    tags:
-      - 'v*'  # Trigger only when pushing a tag starting with 'v'
+    branches:
+      - 'master'  # Trigger only on push to master branch
 
 permissions:
   contents: write  # Allow creating releases
@@ -13,56 +13,68 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      # ✅ Step 1: Check out repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential cmake
+      # ✅ Step 2: Install dependencies (CMake, Make, GCC)
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
 
-    - name: Create Build Directory
-      run: mkdir build
+      # ✅ Step 3: Clean up existing build directory
+      - name: Clean up existing build directory
+        run: |
+          if [ -d "build" ]; then rm -rf build; fi
 
-    - name: Build Project
-      run: |
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
-        make
+      # ✅ Step 4: Create build directory
+      - name: Create Build Directory
+        run: mkdir build
 
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: dna-hidden-repeat-detector
-        path: build/**
+      # ✅ Step 5: Build the project using CMake and Make
+      - name: Build Project
+        run: |
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make
+
+      # ✅ Step 6: Upload Build Artifacts (for download in release)
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dna-hidden-repeat-detector
+          path: build/**
 
   release:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      # ✅ Step 1: Check out repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Download Build Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: dna-hidden-repeat-detector
-        path: build/
+      # ✅ Step 2: Download the build artifact
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dna-hidden-repeat-detector
+          path: build/
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          build/**
-        tag_name: ${{ github.ref_name }}
-        name: Release ${{ github.ref_name }}
-        body: |
-          ## Changes in this release:
-          - Auto-generated release using GitHub Actions.
-          - Built using CMake and Make.
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # ✅ Step 3: Create a GitHub release with the artifacts
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/**
+          tag_name: ${{ github.sha }}
+          name: Release ${{ github.sha }}
+          body: |
+            ## Changes in this release:
+            - Auto-generated release using GitHub Actions.
+            - Built using CMake and Make.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
