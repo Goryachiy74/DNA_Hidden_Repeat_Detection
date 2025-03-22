@@ -198,6 +198,17 @@ void processFullDna(const std::string& filePath, int minSegmentSize, int wordSiz
 		+ std::to_string(lookaheadSize) + ".csv";
 
 	saveSegmentsToCSV(merged, mergedFileName);
+
+	std::cout << "Merged Segments saved successfully!: " << mergedFileName << std::endl;
+
+	auto result = mergeSegmentsWithGCContent(dnaSequence, merged);
+
+	std::string resultFileName = (fs::path(outputPath) /
+		("segments_GcContent_output_" + std::to_string(minSegmentSize) + "_" + std::to_string(wordSize) + "_" + std::to_string(lookaheadSize) + ".csv")).string();
+
+	saveSegmentsGcContentToCsv(result, resultFileName);
+
+	std::cout << "Merged Segments with GC Content saved successfully!: " << resultFileName << std::endl;
 }
 
 void processChromosome(const std::string& chromosomeFile, int minSegmentSize, int wordSize, int lookaheadSize, uint64_t windowSize, uint64_t stepSize, const std::string& outputPath)
@@ -241,6 +252,18 @@ void processChromosome(const std::string& chromosomeFile, int minSegmentSize, in
 		("merged_segments_output_" + std::to_string(minSegmentSize) + "_" + std::to_string(wordSize) + "_" + std::to_string(lookaheadSize) + ".csv")).string();
 
 	saveSegmentsToCSV(merged, mergedFileName);
+
+	std::cout << "Merged Segments saved successfully!: " << mergedFileName << std::endl;
+
+	auto result = mergeSegmentsWithGCContent(chromosome, merged);
+
+	std::string resultFileName = (fs::path(outputPath) /
+		("segments_GcContent_output_" + std::to_string(minSegmentSize) + "_" + std::to_string(wordSize) + "_" + std::to_string(lookaheadSize) + ".csv")).string();
+
+	saveSegmentsGcContentToCsv(result, resultFileName);
+
+	std::cout << "Merged Segments with GC Content saved successfully!: " << resultFileName << std::endl;
+
 	// Section for creation overlaps and statistics disabled
 
 	//int singleSegmentIsochores = 0;

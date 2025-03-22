@@ -79,6 +79,19 @@ void saveIsochoresToCsv(std::vector<Isochore> isochores, size_t window_size, dou
 /// <returns>Vector of isochores.</returns>
 vector<Isochore> loadIsochores(const string& filename);
 
+
+/// <summary>
+/// Merges segments with GC content calculated from the DNA sequence.
+/// </summary>
+/// <param name="sequence">The full DNA sequence as a string.</param>
+/// <param name="segments">Vector of segments (start, end, cost, best word).</param>
+/// <returns>
+/// A new vector containing segments with an additional GC content field.
+/// </returns>
+std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double>> mergeSegmentsWithGCContent(
+    const std::string& sequence,
+    const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments);
+
 //Development section
 std::vector<Isochore> detect_isochores(const std::string& dna_sequence, size_t window_size, double gc_threshold);
 

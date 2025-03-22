@@ -54,7 +54,8 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string>> SegmentDNACostA
 	std::thread progressThread(updateProgress);
 
 
-	if (sequence.size() < static_cast<size_t>(minSegmentSize * wordSize)) {
+	if (sequence.size() < static_cast<size_t>(minSegmentSize * wordSize))
+	{
 		throw std::invalid_argument("Sequence length must be at least the minimum segment size in words.");
 	}
 
@@ -201,6 +202,32 @@ void saveSegmentsToCSV(const std::vector<std::tuple<uint64_t, uint64_t, double, 
 
 	csvFile.close();
 	std::cout << "Segments saved to " << filename << std::endl;
+}
+
+void saveSegmentsGcContentToCsv(const std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double>>& result, const std::string& outputfile)
+{
+	std::ofstream csvFile(outputfile);
+
+	if (!csvFile.is_open()) {
+		std::cerr << "Error: Could not open the file " << outputfile << std::endl;
+		return;
+	}
+
+	// Write the header row
+	csvFile << "Start,End,Length,Cost,Best Word,GC_Content\n";
+
+	// Write each segment to the CSV file
+	for (const auto& [start, end, cost, bestWord, gc_content] : result) {
+		csvFile << start << ","
+			<< end << ","
+			<< (end - start) << ","
+			<< cost << ","
+			<< bestWord << ","
+			<< gc_content << "\n";
+	}
+
+	csvFile.close();
+	std::cout << "Segments saved to " << outputfile << std::endl;
 }
 
 /// <summary>

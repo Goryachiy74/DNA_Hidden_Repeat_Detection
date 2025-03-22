@@ -1,5 +1,7 @@
 #include "Isochore.h"
 
+#include "File_DNA.h"
+
 std::mutex isochoreMtx; // Mutex for thread safety
 uint64_t isochoreProgress = static_cast<uint64_t>(0.0);; // Shared progress variable
 bool isochoreRunning = true; // Control variable for the progress thread
@@ -146,6 +148,47 @@ void runIsochoreDetection(const std::string& genomeSequence,
 	// Stop progress thread
 	isochoreRunning = false;
 	progressThread.join();
+}
+
+/// <summary>
+/// Merges segments with GC content calculated from the DNA sequence.
+/// </summary>
+/// <param name="sequence">The full DNA sequence as a string.</param>
+/// <param name="segments">Vector of segments (start, end, cost, best word).</param>
+/// <returns>
+/// A new vector containing segments with an additional GC content field.
+/// </returns>
+std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double>> mergeSegmentsWithGCContent(
+	const std::string& sequence,
+	const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments)
+{
+	std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double>> result;
+
+	for (const auto& seg : segments) 
+	{
+		uint64_t start = std::get<0>(seg);
+		uint64_t end = std::get<1>(seg);
+		double cost = std::get<2>(seg);
+		std::string bestWord = std::get<3>(seg);
+		int gcCount = 0;
+		int unknownCount = 0;
+		uint64_t windowSize = end - start;
+		// Initialize GC content and unknown characters for the first window
+		for (uint64_t i = start; i < end; i++)
+		{
+			gcCount += calculateBaseGC(sequence[i]);
+			unknownCount += isUnknownBase(sequence[i]);
+		}
+
+		double gcPercentage = (unknownCount < static_cast<int>(windowSize))
+			? (gcCount / static_cast<double>(windowSize - unknownCount)) * 100.0
+			: 0.0;
+
+		// Add to result
+		result.emplace_back(start, end, cost, bestWord, gcPercentage);
+	}
+
+	return result;
 }
 
 // Function to find overlap between isochores and segments
