@@ -50,6 +50,16 @@ int calculateBaseGC(char base)
 }
 
 /// <summary>
+/// Calculates whether a base is G or A.
+/// </summary>
+/// <param name="base">The base character to check.</param>
+/// <returns>1 if the base is G or A; otherwise, 0.</returns>
+int calculateBaseGA(char base)
+{
+	return (base == 'G' || base == 'A') ? 1 : 0;
+}
+
+/// <summary>
 /// Checks if a base is unknown (not A, T, G, or C).
 /// </summary>
 /// <param name="base">The base character to check.</param>
@@ -158,11 +168,11 @@ void runIsochoreDetection(const std::string& genomeSequence,
 /// <returns>
 /// A new vector containing segments with an additional GC content field.
 /// </returns>
-std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double>> mergeSegmentsWithGCContent(
+std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double, double>> mergeSegmentsWithGCContent(
 	const std::string& sequence,
 	const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments)
 {
-	std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double>> result;
+	std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double, double>> result;
 
 	for (const auto& seg : segments) 
 	{
@@ -171,12 +181,14 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double>> mergeSe
 		double cost = std::get<2>(seg);
 		std::string bestWord = std::get<3>(seg);
 		int gcCount = 0;
+		int gaCount = 0;
 		int unknownCount = 0;
 		uint64_t windowSize = end - start;
 		// Initialize GC content and unknown characters for the first window
 		for (uint64_t i = start; i < end; i++)
 		{
 			gcCount += calculateBaseGC(sequence[i]);
+			gaCount+= calculateBaseGA(sequence[i]);
 			unknownCount += isUnknownBase(sequence[i]);
 		}
 
@@ -184,8 +196,12 @@ std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double>> mergeSe
 			? (gcCount / static_cast<double>(windowSize - unknownCount)) * 100.0
 			: 0.0;
 
+		double gaPercentage = (unknownCount < static_cast<int>(windowSize))
+			? (gaCount / static_cast<double>(windowSize - unknownCount)) * 100.0
+			: 0.0;
+
 		// Add to result
-		result.emplace_back(start, end, cost, bestWord, gcPercentage);
+		result.emplace_back(start, end, cost, bestWord, gcPercentage, gaPercentage);
 	}
 
 	return result;

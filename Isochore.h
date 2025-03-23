@@ -88,7 +88,7 @@ vector<Isochore> loadIsochores(const string& filename);
 /// <returns>
 /// A new vector containing segments with an additional GC content field.
 /// </returns>
-std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double>> mergeSegmentsWithGCContent(
+std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double, double>> mergeSegmentsWithGCContent(
     const std::string& sequence,
     const std::vector<std::tuple<uint64_t, uint64_t, double, std::string>>& segments);
 

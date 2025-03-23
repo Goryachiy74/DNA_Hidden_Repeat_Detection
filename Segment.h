@@ -51,7 +51,7 @@ void saveSegmentsToCSV(const std::vector<std::tuple<uint64_t, uint64_t, double, 
 /// </summary>
 /// <param name="result">Vector of tuples containing segment data with GC Content</param>
 /// <param name="outputfile">Path to the output CSV file.</param>
-void saveSegmentsGcContentToCsv(const std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double>>& result, const std::string& outputfile);
+void saveSegmentsGcContentToCsv(const std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double, double>>& result, const std::string& outputfile);
 
 /// <summary>
 /// Loads segmented DNA data from a CSV file.

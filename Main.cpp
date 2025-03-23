@@ -143,11 +143,11 @@ int main(int argc, char** argv)
 	std::cout << "Window Size: " << windowSize << std::endl;
 	std::cout << "Step Size: " << stepSize << std::endl;
 
-	if (inputType == "fullDna") 
+	if (inputType == "fullDna")
 	{
 		processFullDna(filePath, minSegmentSize, wordSize, lookaheadSize, windowSize, stepSize, outputPath);
 	}
-	else 
+	else
 	{
 		processChromosome(filePath, minSegmentSize, wordSize, lookaheadSize, windowSize, stepSize, outputPath);
 	}
@@ -263,42 +263,5 @@ void processChromosome(const std::string& chromosomeFile, int minSegmentSize, in
 	saveSegmentsGcContentToCsv(result, resultFileName);
 
 	std::cout << "Merged Segments with GC Content saved successfully!: " << resultFileName << std::endl;
-
-	// Section for creation overlaps and statistics disabled
-
-	//int singleSegmentIsochores = 0;
-	//double singleSegmentGCSum = 0;
-	//double totalCostSum = 0;
-	//double maxCost = 0;
-	//double minCost = 0;
-	//map<string, int> wordFrequency;
-
-	//std::string isochoresFileName = (fs::path(outputPath) /
-	//	("isochores_output_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
-
-	//auto isochores = loadIsochores(isochoresFileName);
-
-	//// Find overlaps
-	//vector<Overlap> overlaps = findIsochoreSegmentOverlap(
-	//	isochores, segments, singleSegmentIsochores,
-	//	singleSegmentGCSum, totalCostSum, maxCost,
-	//	minCost, wordFrequency
-	//);
-
-	//std::string overlapsFileName = (fs::path(outputPath) /
-	//	("overlaps_isochores_output_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
-
-	//// Save to CSV
-	//saveOverlapsToCSV(overlapsFileName, overlaps);
-
-	//std::string statisticsFileName = (fs::path(outputPath) /
-	//	("statistics_overlaps_" + std::to_string(windowSize) + "_" + std::to_string(stepSize) + ".csv")).string();
-
-	//// Save statistics
-	//saveStatisticsToFile(statisticsFileName, isochores.size(),
-	//	singleSegmentIsochores, singleSegmentGCSum / singleSegmentIsochores,
-	//	totalCostSum / overlaps.size(), maxCost, minCost,
-	//	wordFrequency.begin()->first, wordFrequency.begin()->second);
-
 }
 

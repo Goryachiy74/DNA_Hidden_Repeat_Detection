@@ -204,26 +204,29 @@ void saveSegmentsToCSV(const std::vector<std::tuple<uint64_t, uint64_t, double, 
 	std::cout << "Segments saved to " << filename << std::endl;
 }
 
-void saveSegmentsGcContentToCsv(const std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double>>& result, const std::string& outputfile)
+void saveSegmentsGcContentToCsv(const std::vector<std::tuple<uint64_t, uint64_t, double, std::string, double, double>>& result, const std::string& outputfile)
 {
 	std::ofstream csvFile(outputfile);
 
-	if (!csvFile.is_open()) {
+	if (!csvFile.is_open()) 
+	{
 		std::cerr << "Error: Could not open the file " << outputfile << std::endl;
 		return;
 	}
 
 	// Write the header row
-	csvFile << "Start,End,Length,Cost,Best Word,GC_Content\n";
+	csvFile << "Start,End,Length,Cost,Best Word,GC_Content,GA_content\n";
 
 	// Write each segment to the CSV file
-	for (const auto& [start, end, cost, bestWord, gc_content] : result) {
+	for (const auto& [start, end, cost, bestWord, gc_content, ga_content] : result) 
+	{
 		csvFile << start << ","
 			<< end << ","
 			<< (end - start) << ","
 			<< cost << ","
 			<< bestWord << ","
-			<< gc_content << "\n";
+			<< gc_content << ","
+			<< ga_content << "\n";
 	}
 
 	csvFile.close();
